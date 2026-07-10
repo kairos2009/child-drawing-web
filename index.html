@@ -54,6 +54,41 @@
     .form-grid .form-row { margin-bottom: 0; }
     header h1 { font-size: 1.8rem; }
   }
+
+  /* 탭 전환 */
+  main { padding-bottom: 84px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .tabbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    z-index: 50;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 8px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .tab-btn .tab-icon { font-size: 1.4rem; line-height: 1; }
+  .tab-btn.active { color: #ff6b6b; }
+  .tab-btn:focus { outline: none; }
+  .tab-btn:focus-visible { outline: 2px solid #ff9a9e; outline-offset: -2px; }
 </style>
 <link rel="manifest" href="./manifest.webmanifest" />
 <meta name="theme-color" content="#ff9a9e" />
@@ -69,7 +104,7 @@
   <p>소중한 우리 아이의 그림을 기록해보세요</p>
 </header>
 <main>
-  <section class="card">
+  <section class="card tab-panel" id="panel-upload">
     <h2>그림 추가하기</h2>
     <form id="upload-form">
       <div class="form-row">
@@ -83,7 +118,7 @@
           <input type="text" id="title-input" placeholder="예: 우리 가족" required maxlength="60" />
         </div>
         <div class="form-row">
-          <label for="author-input">작가 (자녀 이름)</label>
+          <label for="author-input">이름</label>
           <input type="text" id="author-input" placeholder="예: 서연" required maxlength="30" />
         </div>
         <div class="form-row">
@@ -96,10 +131,10 @@
       </div>
     </form>
   </section>
-  <section class="card">
+  <section class="card tab-panel active" id="panel-gallery">
     <h2>갤러리</h2>
     <div class="filter-bar">
-      <label for="filter-author">작가별:</label>
+      <label for="filter-author">이름별:</label>
       <select id="filter-author"><option value="">전체</option></select>
       <span class="count" id="count-label">0장</span>
     </div>
@@ -107,6 +142,17 @@
     <div id="empty" class="empty" style="display:none;">아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️</div>
   </section>
 </main>
+
+<nav class="tabbar" role="tablist" aria-label="화면 전환">
+  <button type="button" class="tab-btn active" data-target="panel-gallery" role="tab" aria-selected="true">
+    <span class="tab-icon" aria-hidden="true">🖼️</span>
+    <span>갤러리</span>
+  </button>
+  <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">➕</span>
+    <span>그림 저장</span>
+  </button>
+</nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true">
   <div class="modal-content">
     <div class="modal-header">
@@ -115,7 +161,7 @@
     </div>
     <div class="modal-body"><img id="modal-image" alt="" /></div>
     <div class="modal-footer">
-      <span><strong>작가</strong><span id="modal-author"></span></span>
+      <span><strong>이름</strong><span id="modal-author"></span></span>
       <span><strong>날짜</strong><span id="modal-date"></span></span>
     </div>
   </div>
@@ -147,6 +193,20 @@
   var modalClose = document.getElementById('modal-close');
   var pendingImage = null;
   dateInput.value = new Date().toISOString().slice(0, 10);
+
+  function switchTab(targetId) {
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.toggle('active', p.id === targetId); });
+    document.querySelectorAll('.tab-btn').forEach(function (b) {
+      var isActive = b.getAttribute('data-target') === targetId;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  document.querySelectorAll('.tab-btn').forEach(function (b) {
+    b.addEventListener('click', function () { switchTab(b.getAttribute('data-target')); });
+  });
+
   function loadAll() {
     try { var raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
     catch (e) { console.error('저장소 읽기 실패', e); return []; }
@@ -187,7 +247,7 @@
     if (filtered.length === 0) {
       gallery.innerHTML = '';
       emptyMsg.style.display = 'block';
-      emptyMsg.textContent = list.length === 0 ? '아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️' : '이 작가의 그림이 없어요.';
+      emptyMsg.textContent = list.length === 0 ? '아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️' : '이 이름의 그림이 없어요.';
       return;
     }
     emptyMsg.style.display = 'none';
@@ -225,6 +285,7 @@
       pendingImage = null;
       preview.classList.remove('show');
       render();
+      switchTab('panel-gallery');
     }
   });
   gallery.addEventListener('click', function (e) {
