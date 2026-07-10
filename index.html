@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>자녀 그림 관리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #fafafa; color: #222; line-height: 1.5; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  header h1 { font-size: 1.5rem; }
+  header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 20px; }
+  .card h2 { font-size: 1.1rem; margin-bottom: 14px; color: #444; }
+  .form-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .form-row label { font-size: 0.85rem; color: #666; font-weight: 600; }
+  .form-row input[type=text], .form-row input[type=date], .form-row input[type=file], .form-row select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #fff; width: 100%; }
+  .form-row input:focus, .form-row select:focus { outline: none; border-color: #ff9a9e; box-shadow: 0 0 0 3px rgba(255,154,158,0.15); }
+  .btn { padding: 11px 18px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: transform 0.08s, box-shadow 0.15s; }
+  .btn-primary { background: #ff6b6b; color: #fff; }
+  .btn-primary:hover { background: #ff5555; box-shadow: 0 2px 8px rgba(255,107,107,0.35); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-danger { background: #fff; color: #e63946; border: 1px solid #e63946; padding: 6px 12px; font-size: 0.8rem; }
+  .btn-danger:hover { background: #e63946; color: #fff; }
+  .btn-close { background: transparent; color: #fff; font-size: 2rem; padding: 0 12px; line-height: 1; }
+  .preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; background: #f0f0f0; display: none; margin-top: 8px; }
+  .preview.show { display: block; }
+  .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-bar label { font-size: 0.85rem; color: #666; font-weight: 600; }
+  .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 0.9rem; min-width: 140px; }
+  .count { margin-left: auto; color: #888; font-size: 0.85rem; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .gallery-item { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; display: flex; flex-direction: column; }
+  .gallery-item:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .gallery-item img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #eee; }
+  .gallery-item .meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .gallery-item .title { font-weight: 700; font-size: 0.95rem; }
+  .gallery-item .author { font-size: 0.82rem; color: #ff6b6b; }
+  .gallery-item .date { font-size: 0.75rem; color: #999; }
+  .gallery-item .actions { padding: 0 12px 12px; }
+  .empty { text-align: center; padding: 40px 20px; color: #aaa; font-size: 0.95rem; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal.show { display: flex; }
+  .modal-content { max-width: 900px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #000; color: #fff; }
+  .modal-header h3 { font-size: 1rem; font-weight: 600; }
+  .modal-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; }
+  .modal-body img { max-width: 100%; max-height: 70vh; object-fit: contain; }
+  .modal-footer { padding: 12px 16px; color: #ccc; background: #0a0a0a; font-size: 0.9rem; display: flex; gap: 16px; flex-wrap: wrap; }
+  .modal-footer span strong { color: #fff; margin-right: 4px; }
+  @media (min-width: 640px) {
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .form-row { margin-bottom: 0; }
+    header h1 { font-size: 1.8rem; }
+  }
+</style>
+<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="theme-color" content="#ff9a9e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="그림앨범" />
+<link rel="apple-touch-icon" href="./icon.svg" />
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+</head>
+<body>
+<header>
+  <h1>🎨 자녀 그림 관리</h1>
+  <p>소중한 우리 아이의 그림을 기록해보세요</p>
+</header>
+<main>
+  <section class="card">
+    <h2>그림 추가하기</h2>
+    <form id="upload-form">
+      <div class="form-row">
+        <label for="file-input">그림 파일</label>
+        <input type="file" id="file-input" accept="image/*" required />
+        <img id="preview" class="preview" alt="미리보기" />
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="title-input">제목</label>
+          <input type="text" id="title-input" placeholder="예: 우리 가족" required maxlength="60" />
+        </div>
+        <div class="form-row">
+          <label for="author-input">작가 (자녀 이름)</label>
+          <input type="text" id="author-input" placeholder="예: 서연" required maxlength="30" />
+        </div>
+        <div class="form-row">
+          <label for="date-input">그린 날짜</label>
+          <input type="date" id="date-input" required />
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <button type="submit" class="btn btn-primary">저장하기</button>
+      </div>
+    </form>
+  </section>
+  <section class="card">
+    <h2>갤러리</h2>
+    <div class="filter-bar">
+      <label for="filter-author">작가별:</label>
+      <select id="filter-author"><option value="">전체</option></select>
+      <span class="count" id="count-label">0장</span>
+    </div>
+    <div id="gallery" class="gallery"></div>
+    <div id="empty" class="empty" style="display:none;">아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️</div>
+  </section>
+</main>
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body"><img id="modal-image" alt="" /></div>
+    <div class="modal-footer">
+      <span><strong>작가</strong><span id="modal-author"></span></span>
+      <span><strong>날짜</strong><span id="modal-date"></span></span>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('SW 등록 실패', e); });
+    });
+  }
+  var STORAGE_KEY = 'child-drawings-v1';
+  var fileInput = document.getElementById('file-input');
+  var preview = document.getElementById('preview');
+  var titleInput = document.getElementById('title-input');
+  var authorInput = document.getElementById('author-input');
+  var dateInput = document.getElementById('date-input');
+  var form = document.getElementById('upload-form');
+  var gallery = document.getElementById('gallery');
+  var emptyMsg = document.getElementById('empty');
+  var filterSelect = document.getElementById('filter-author');
+  var countLabel = document.getElementById('count-label');
+  var modal = document.getElementById('modal');
+  var modalImage = document.getElementById('modal-image');
+  var modalTitle = document.getElementById('modal-title');
+  var modalAuthor = document.getElementById('modal-author');
+  var modalDate = document.getElementById('modal-date');
+  var modalClose = document.getElementById('modal-close');
+  var pendingImage = null;
+  dateInput.value = new Date().toISOString().slice(0, 10);
+  function loadAll() {
+    try { var raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+    catch (e) { console.error('저장소 읽기 실패', e); return []; }
+  }
+  function saveAll(list) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); return true; }
+    catch (e) { alert('저장 공간이 부족합니다. 오래된 그림을 삭제해 주세요.'); return false; }
+  }
+  function readFileAsDataURL(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(file);
+    });
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function formatDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '.';
+  }
+  function render() {
+    var list = loadAll();
+    var authors = Array.from(new Set(list.map(function (d) { return d.author; }))).sort();
+    var currentFilter = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">전체</option>' +
+      authors.map(function (a) { return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>'; }).join('');
+    if (authors.indexOf(currentFilter) !== -1) filterSelect.value = currentFilter;
+    var filtered = filterSelect.value ? list.filter(function (d) { return d.author === filterSelect.value; }) : list;
+    filtered.sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0); });
+    countLabel.textContent = filtered.length + '장';
+    if (filtered.length === 0) {
+      gallery.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      emptyMsg.textContent = list.length === 0 ? '아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️' : '이 작가의 그림이 없어요.';
+      return;
+    }
+    emptyMsg.style.display = 'none';
+    gallery.innerHTML = filtered.map(function (d) {
+      return '<div class="gallery-item" data-id="' + escapeHtml(d.id) + '">' +
+        '<img src="' + d.image + '" alt="' + escapeHtml(d.title) + '" />' +
+        '<div class="meta">' +
+          '<div class="title">' + escapeHtml(d.title) + '</div>' +
+          '<div class="author">✏️ ' + escapeHtml(d.author) + '</div>' +
+          '<div class="date">' + escapeHtml(formatDate(d.date)) + '</div>' +
+        '</div>' +
+        '<div class="actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button></div>' +
+      '</div>';
+    }).join('');
+  }
+  fileInput.addEventListener('change', function () {
+    var file = fileInput.files && fileInput.files[0];
+    if (!file) { pendingImage = null; preview.classList.remove('show'); return; }
+    if (!file.type.startsWith('image/')) { alert('이미지 파일만 선택해 주세요.'); fileInput.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { alert('5MB 이하의 이미지만 저장할 수 있습니다.'); fileInput.value = ''; return; }
+    readFileAsDataURL(file).then(function (dataUrl) { pendingImage = dataUrl; preview.src = dataUrl; preview.classList.add('show'); });
+  });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!pendingImage) { alert('먼저 그림 파일을 선택해 주세요.'); return; }
+    var title = titleInput.value.trim();
+    var author = authorInput.value.trim();
+    var date = dateInput.value;
+    if (!title || !author || !date) { alert('모든 항목을 입력해 주세요.'); return; }
+    var list = loadAll();
+    list.push({ id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, image: pendingImage, createdAt: Date.now() });
+    if (saveAll(list)) {
+      form.reset();
+      dateInput.value = new Date().toISOString().slice(0, 10);
+      pendingImage = null;
+      preview.classList.remove('show');
+      render();
+    }
+  });
+  gallery.addEventListener('click', function (e) {
+    var deleteBtn = e.target.closest('[data-action="delete"]');
+    if (deleteBtn) {
+      e.stopPropagation();
+      var id = deleteBtn.getAttribute('data-id');
+      if (confirm('이 그림을 삭제할까요?')) {
+        var list = loadAll().filter(function (d) { return d.id !== id; });
+        saveAll(list);
+        render();
+      }
+      return;
+    }
+    var item = e.target.closest('.gallery-item');
+    if (item) openModal(item.getAttribute('data-id'));
+  });
+  function openModal(id) {
+    var d = loadAll().find(function (x) { return x.id === id; });
+    if (!d) return;
+    modalImage.src = d.image;
+    modalImage.alt = d.title;
+    modalTitle.textContent = d.title;
+    modalAuthor.textContent = d.author;
+    modalDate.textContent = formatDate(d.date);
+    modal.classList.add('show');
+  }
+  function closeModal() { modal.classList.remove('show'); modalImage.src = ''; }
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
+  filterSelect.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
