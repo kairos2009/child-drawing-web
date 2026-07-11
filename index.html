@@ -187,6 +187,13 @@
         </div>
       </button>
       <input type="file" id="import-file" accept=".json" hidden />
+      <button type="button" class="backup-btn" id="btn-reset" style="border-color:#e63946;">
+        <span class="backup-icon">🗑️</span>
+        <div class="backup-btn-inner">
+          <span style="color:#e63946;">전체 초기화</span>
+          <span class="backup-desc">모든 그림 데이터를 삭제합니다. 복구 불가능합니다.</span>
+        </div>
+      </button>
     </div>
     <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.11_01.01</p>
     <p style="text-align:center; font-size:0.75rem; color:#ccc;">projected by Progrea</p>
@@ -613,6 +620,7 @@
       var blob = new Blob([json], { type: 'application/json' });
       var today = new Date().toISOString().slice(0, 10);
       triggerDownload(URL.createObjectURL(blob), '그림백업_' + today + '.json');
+      alert(list.length + '개의 그림이 백업되었습니다!\n파일명: 그림백업_' + today + '.json');
     });
   });
 
@@ -644,6 +652,32 @@
     };
     reader.readAsText(file);
     e.target.value = '';
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    if (!confirm('모든 그림 데이터가 삭제됩니다.\n삭제 후 복구가 불가능합니다.\n정말 초기화하시겠습니까?')) return;
+    if (!confirm('한 번 더 확인합니다.\n정말로 전체 삭제하시겠습니까?')) return;
+    openDB().then(function (d) {
+      var tx = d.transaction(STORE_NAME, 'readwrite');
+      tx.oncomplete = function () {
+        try { localStorage.removeItem(LS_KEY); } catch(e) {}
+        alert('초기화가 완료되었습니다.');
+        render();
+        switchTab('panel-gallery');
+      };
+      tx.onerror = function () { alert('초기화에 실패했습니다.'); };
+      tx.objectStore(STORE_NAME).clear();
+    }).catch(function () {
+      // localStorage 모드
+      try {
+        localStorage.removeItem(LS_KEY);
+        alert('초기화가 완료되었습니다.');
+        render();
+        switchTab('panel-gallery');
+      } catch(e) {
+        alert('초기화에 실패했습니다.');
+      }
+    });
   });
 
   filterSelect.addEventListener('change', render);
