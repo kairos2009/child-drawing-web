@@ -188,6 +188,8 @@
       </button>
       <input type="file" id="import-file" accept=".json" hidden />
     </div>
+    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.11_01.01</p>
+    <p style="text-align:center; font-size:0.75rem; color:#ccc;">projected by Progrea</p>
   </section>
 </main>
 
@@ -534,10 +536,13 @@
     var item = { id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, unknownDate: isUnknown, image: pendingImage, createdAt: Date.now() };
     dbPut(item).then(function () {
       form.reset();
+      // form.reset() 후 날짜/체크박스 상태 명시적 복원
+      unknownDate.checked = false;
       dateInput.value = new Date().toISOString().slice(0, 10);
       dateInput.disabled = false;
       dateInput.style.opacity = '1';
       pendingImage = null;
+      preview.src = '';
       previewWrap.classList.remove('show');
       render();
       switchTab('panel-gallery');
@@ -584,25 +589,30 @@
   // 사진 1장 다운로드
   document.getElementById('modal-download').addEventListener('click', function () {
     if (!currentModalData) return;
-    var a = document.createElement('a');
-    a.href = currentModalData.image;
-    a.download = (currentModalData.title || '그림') + '.jpg';
-    a.click();
+    triggerDownload(currentModalData.image, (currentModalData.title || '그림') + '.jpg');
   });
 
   // ===== 백업 / 복원 =====
+  function triggerDownload(url, filename) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
   document.getElementById('btn-export').addEventListener('click', function () {
     dbGetAll().then(function (list) {
       if (list.length === 0) { alert('저장된 그림이 없습니다.'); return; }
       var json = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), drawings: list });
       var blob = new Blob([json], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
       var today = new Date().toISOString().slice(0, 10);
-      a.href = url;
-      a.download = '그림백업_' + today + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      triggerDownload(URL.createObjectURL(blob), '그림백업_' + today + '.json');
     });
   });
 
