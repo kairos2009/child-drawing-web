@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>자녀 그림 관리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #fafafa; color: #222; line-height: 1.5; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  header h1 { font-size: 1.5rem; }
+  header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 20px; }
+  .card h2 { font-size: 1.1rem; margin-bottom: 14px; color: #444; }
+  .form-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .form-row label { font-size: 0.85rem; color: #666; font-weight: 600; }
+  .form-row input[type=text], .form-row input[type=date], .form-row input[type=file], .form-row select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #fff; width: 100%; }
+  .form-row input:focus, .form-row select:focus { outline: none; border-color: #ff9a9e; box-shadow: 0 0 0 3px rgba(255,154,158,0.15); }
+  .btn { padding: 11px 18px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: transform 0.08s, box-shadow 0.15s; }
+  .btn-primary { background: #ff6b6b; color: #fff; }
+  .btn-primary:hover { background: #ff5555; box-shadow: 0 2px 8px rgba(255,107,107,0.35); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-danger { background: #fff; color: #e63946; border: 1px solid #e63946; padding: 6px 12px; font-size: 0.8rem; }
+  .btn-danger:hover { background: #e63946; color: #fff; }
+  .btn-close { background: transparent; color: #fff; font-size: 2rem; padding: 0 12px; line-height: 1; }
+  .preview-wrap { display: none; margin-top: 8px; }
+  .preview-wrap.show { display: block; }
+  .preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; background: #f0f0f0; display: block; }
+  .rotate-btns { display: flex; gap: 8px; margin-top: 8px; }
+  .btn-rotate { flex: 1; padding: 8px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
+  .btn-rotate:active { background: #eee; }
+  .unknown-date-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+  .unknown-date-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #ff6b6b; cursor: pointer; }
+  .unknown-date-row label { font-size: 0.82rem; color: #888; cursor: pointer; }
+  .backup-section { display: flex; flex-direction: column; gap: 12px; }
+  .backup-btn { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #333; width: 100%; }
+  .backup-btn:active { background: #f0f0f0; }
+  .backup-btn .backup-icon { font-size: 1.5rem; }
+  .backup-btn .backup-desc { font-size: 0.78rem; color: #999; font-weight: 400; margin-top: 2px; }
+  .backup-btn-inner { display: flex; flex-direction: column; text-align: left; }
+  .btn-download-img { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+  .btn-download-img:active { background: rgba(255,255,255,0.25); }
+  .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-bar label { font-size: 0.85rem; color: #666; font-weight: 600; }
+  .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 0.9rem; min-width: 140px; }
+  .count { margin-left: auto; color: #888; font-size: 0.85rem; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .gallery-item { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; display: flex; flex-direction: column; }
+  .gallery-item:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .gallery-item img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #eee; }
+  .gallery-item .meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .gallery-item .title { font-weight: 700; font-size: 0.95rem; }
+  .gallery-item .author { font-size: 0.82rem; color: #ff6b6b; }
+  .gallery-item .date { font-size: 0.75rem; color: #999; }
+  .gallery-item .actions { padding: 0 12px 12px; }
+  .empty { text-align: center; padding: 40px 20px; color: #aaa; font-size: 0.95rem; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal.show { display: flex; }
+  .modal-content { max-width: 900px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #000; color: #fff; }
+  .modal-header h3 { font-size: 1rem; font-weight: 600; }
+  .modal-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; }
+  .modal-body img { max-width: 100%; max-height: 70vh; object-fit: contain; }
+  .modal-footer { padding: 12px 16px; color: #ccc; background: #0a0a0a; font-size: 0.9rem; display: flex; gap: 16px; flex-wrap: wrap; }
+  .modal-footer span strong { color: #fff; margin-right: 4px; }
+  @media (min-width: 640px) {
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .form-row { margin-bottom: 0; }
+    header h1 { font-size: 1.8rem; }
+  }
+
+  /* 탭 전환 */
+  main { padding-bottom: 84px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .tabbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    z-index: 50;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 8px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .tab-btn .tab-icon { font-size: 1.4rem; line-height: 1; }
+  .tab-btn.active { color: #ff6b6b; }
+  .tab-btn:focus { outline: none; }
+  .tab-btn:focus-visible { outline: 2px solid #ff9a9e; outline-offset: -2px; }
+</style>
+<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="theme-color" content="#ff9a9e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="그림앨범" />
+<link rel="apple-touch-icon" href="./icon.svg" />
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+</head>
+<body>
+<header>
+  <h1>🎨 자녀 그림 관리</h1>
+  <p>소중한 우리 아이의 그림을 기록해보세요</p>
+</header>
+<main>
+  <section class="card tab-panel" id="panel-upload">
+    <h2>그림 추가하기</h2>
+    <form id="upload-form">
+      <div class="form-row">
+        <label for="file-input">그림 파일</label>
+        <input type="file" id="file-input" accept="image/*" required />
+        <div class="preview-wrap" id="preview-wrap">
+          <img id="preview" class="preview" alt="미리보기" />
+          <div class="rotate-btns">
+            <button type="button" class="btn-rotate" id="rotate-left">↺ 왼쪽 회전</button>
+            <button type="button" class="btn-rotate" id="rotate-right">↻ 오른쪽 회전</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="title-input">제목</label>
+          <input type="text" id="title-input" placeholder="예: 우리 가족" required maxlength="60" />
+        </div>
+        <div class="form-row">
+          <label for="author-input">이름</label>
+          <input type="text" id="author-input" placeholder="예: 서연" required maxlength="30" />
+        </div>
+        <div class="form-row">
+          <label for="date-input">그린 날짜</label>
+          <input type="date" id="date-input" />
+          <div class="unknown-date-row">
+            <input type="checkbox" id="unknown-date" />
+            <label for="unknown-date">그린 날짜를 알 수 없음</label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <button type="submit" class="btn btn-primary">저장하기</button>
+      </div>
+    </form>
+  </section>
+  <section class="card tab-panel active" id="panel-gallery">
+    <h2>갤러리</h2>
+    <div class="filter-bar">
+      <select id="filter-month"><option value="">전체 월</option></select>
+      <select id="filter-author"><option value="">전체 이름</option></select>
+      <span class="count" id="count-label">0장</span>
+    </div>
+    <div id="gallery" class="gallery"></div>
+    <div id="empty" class="empty" style="display:none;">아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️</div>
+  </section>
+</main>
+
+  <!-- 백업 탭 -->
+  <section class="card tab-panel" id="panel-backup">
+    <h2>백업 / 복원</h2>
+    <div class="backup-section">
+      <button type="button" class="backup-btn" id="btn-export">
+        <span class="backup-icon">⬇️</span>
+        <div class="backup-btn-inner">
+          <span>데이터 백업 (다운로드)</span>
+          <span class="backup-desc">모든 그림을 파일로 저장합니다. 핸드폰 변경 전 꼭 백업하세요.</span>
+        </div>
+      </button>
+      <button type="button" class="backup-btn" id="btn-import">
+        <span class="backup-icon">⬆️</span>
+        <div class="backup-btn-inner">
+          <span>데이터 복원 (불러오기)</span>
+          <span class="backup-desc">백업 파일을 선택하면 그림이 복원됩니다.</span>
+        </div>
+      </button>
+      <input type="file" id="import-file" accept=".json" hidden />
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="화면 전환">
+  <button type="button" class="tab-btn active" data-target="panel-gallery" role="tab" aria-selected="true">
+    <span class="tab-icon" aria-hidden="true">🖼️</span>
+    <span>갤러리</span>
+  </button>
+  <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">➕</span>
+    <span>그림 저장</span>
+  </button>
+  <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false">
+    <span class="tab-icon" aria-hidden="true">💾</span>
+    <span>백업</span>
+  </button>
+</nav>
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body"><img id="modal-image" alt="" /></div>
+    <div class="modal-footer">
+      <span><strong>이름</strong><span id="modal-author"></span></span>
+      <span><strong>날짜</strong><span id="modal-date"></span></span>
+      <button type="button" class="btn-download-img" id="modal-download">⬇️ 다운로드</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('SW 등록 실패', e); });
+    });
+  }
+
+  // ===== 저장소: IndexedDB 우선, 실패 시 localStorage 자동 전환 =====
+  var DB_NAME = 'child-drawings-db';
+  var DB_VERSION = 1;
+  var STORE_NAME = 'drawings';
+  var LS_KEY = 'child-drawings-v2';
+  var db = null;
+  var useLS = false; // localStorage 모드 여부
+
+  function openDB() {
+    return new Promise(function (resolve, reject) {
+      if (db) { resolve(db); return; }
+      if (useLS) { reject(new Error('LS mode')); return; }
+      try {
+        var req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = function (e) {
+          var d = e.target.result;
+          if (!d.objectStoreNames.contains(STORE_NAME)) {
+            d.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = function (e) { db = e.target.result; resolve(db); };
+        req.onerror = function () { useLS = true; reject(req.error); };
+      } catch (e) { useLS = true; reject(e); }
+    });
+  }
+
+  // localStorage 헬퍼
+  function lsGetAll() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function lsSave(list) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(list)); return true; }
+    catch(e) { throw new Error('저장 공간 부족: ' + e.message); }
+  }
+
+  function dbGetAll() {
+    return openDB().then(function (d) {
+      return new Promise(function (resolve, reject) {
+        var tx = d.transaction(STORE_NAME, 'readonly');
+        var req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }).catch(function () {
+      // IndexedDB 실패 → localStorage
+      return Promise.resolve(lsGetAll());
+    });
+  }
+
+  function dbPut(item) {
+    return openDB().then(function (d) {
+      return new Promise(function (resolve, reject) {
+        var tx = d.transaction(STORE_NAME, 'readwrite');
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+        tx.onabort = function () { reject(tx.error || new Error('저장 취소됨')); };
+        tx.objectStore(STORE_NAME).put(item);
+      });
+    }).catch(function () {
+      // IndexedDB 실패 → localStorage
+      var list = lsGetAll();
+      var idx = list.findIndex(function(x){ return x.id === item.id; });
+      if (idx >= 0) list[idx] = item; else list.push(item);
+      lsSave(list);
+      return Promise.resolve();
+    });
+  }
+
+  function dbDelete(id) {
+    return openDB().then(function (d) {
+      return new Promise(function (resolve, reject) {
+        var tx = d.transaction(STORE_NAME, 'readwrite');
+        var req = tx.objectStore(STORE_NAME).delete(id);
+        req.onsuccess = function () { resolve(); };
+        req.onerror = function () { reject(req.error); };
+      });
+    }).catch(function () {
+      // IndexedDB 실패 → localStorage
+      lsSave(lsGetAll().filter(function(x){ return x.id !== id; }));
+      return Promise.resolve();
+    });
+  }
+
+  // ===== UI 요소 =====
+  var fileInput = document.getElementById('file-input');
+  var preview = document.getElementById('preview');
+  var previewWrap = document.getElementById('preview-wrap');
+  var titleInput = document.getElementById('title-input');
+  var authorInput = document.getElementById('author-input');
+  var dateInput = document.getElementById('date-input');
+  var unknownDate = document.getElementById('unknown-date');
+  var form = document.getElementById('upload-form');
+  var gallery = document.getElementById('gallery');
+  var emptyMsg = document.getElementById('empty');
+  var filterSelect = document.getElementById('filter-author');
+  var filterMonth = document.getElementById('filter-month');
+  var countLabel = document.getElementById('count-label');
+  var modal = document.getElementById('modal');
+  var modalImage = document.getElementById('modal-image');
+  var modalTitle = document.getElementById('modal-title');
+  var modalAuthor = document.getElementById('modal-author');
+  var modalDate = document.getElementById('modal-date');
+  var modalClose = document.getElementById('modal-close');
+  var pendingImage = null;
+  var currentRotation = 0;
+  dateInput.value = new Date().toISOString().slice(0, 10);
+
+  // 날짜 알 수 없음 체크박스
+  unknownDate.addEventListener('change', function () {
+    dateInput.disabled = unknownDate.checked;
+    dateInput.style.opacity = unknownDate.checked ? '0.4' : '1';
+    if (unknownDate.checked) dateInput.value = '';
+    else dateInput.value = new Date().toISOString().slice(0, 10);
+  });
+
+  function switchTab(targetId) {
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.toggle('active', p.id === targetId); });
+    document.querySelectorAll('.tab-btn').forEach(function (b) {
+      var isActive = b.getAttribute('data-target') === targetId;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  document.querySelectorAll('.tab-btn').forEach(function (b) {
+    b.addEventListener('click', function () { switchTab(b.getAttribute('data-target')); });
+  });
+
+  function readFileAsDataURL(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 이미지를 최대 1200px, 품질 0.82로 압축
+  function compressImage(dataUrl) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var MAX = 800;
+        var w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function formatDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '.';
+  }
+
+  function getMonthKey(d) {
+    if (!d.date || d.unknownDate) return '';
+    return d.date.slice(0, 7); // "YYYY-MM"
+  }
+
+  function render() {
+    dbGetAll().then(function (list) {
+      // 월 목록 업데이트
+      var months = Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();
+      var curMonth = filterMonth.value;
+      filterMonth.innerHTML = '<option value="">전체 월</option>' +
+        months.map(function (m) {
+          var parts = m.split('-');
+          return '<option value="' + m + '">' + parts[0] + '년 ' + parseInt(parts[1]) + '월</option>';
+        }).join('');
+      if (months.indexOf(curMonth) !== -1) filterMonth.value = curMonth;
+
+      // 이름 목록 업데이트
+      var authors = Array.from(new Set(list.map(function (d) { return d.author; }))).sort();
+      var curAuthor = filterSelect.value;
+      filterSelect.innerHTML = '<option value="">전체 이름</option>' +
+        authors.map(function (a) { return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>'; }).join('');
+      if (authors.indexOf(curAuthor) !== -1) filterSelect.value = curAuthor;
+
+      // 필터 적용
+      var filtered = list;
+      if (filterMonth.value) filtered = filtered.filter(function (d) { return getMonthKey(d) === filterMonth.value; });
+      if (filterSelect.value) filtered = filtered.filter(function (d) { return d.author === filterSelect.value; });
+      filtered.sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0); });
+
+      countLabel.textContent = filtered.length + '장';
+      if (filtered.length === 0) {
+        gallery.innerHTML = '';
+        emptyMsg.style.display = 'block';
+        emptyMsg.textContent = list.length === 0 ? '아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️' : '조건에 맞는 그림이 없어요.';
+        return;
+      }
+      emptyMsg.style.display = 'none';
+      gallery.innerHTML = filtered.map(function (d) {
+        return '<div class="gallery-item" data-id="' + escapeHtml(d.id) + '">' +
+          '<img src="' + d.image + '" alt="' + escapeHtml(d.title) + '" />' +
+          '<div class="meta">' +
+            '<div class="title">' + escapeHtml(d.title) + '</div>' +
+            '<div class="author">✏️ ' + escapeHtml(d.author) + '</div>' +
+            '<div class="date">' + escapeHtml(d.unknownDate ? '날짜 미상' : formatDate(d.date)) + '</div>' +
+          '</div>' +
+          '<div class="actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button></div>' +
+        '</div>';
+      }).join('');
+    });
+  }
+
+  // 이미지 회전 후 압축까지 적용
+  function rotateImage(dataUrl, deg) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var canvas = document.createElement('canvas');
+        var rad = deg * Math.PI / 180;
+        canvas.width = img.height;
+        canvas.height = img.width;
+        var ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        // 회전 후 재압축
+        resolve(compressImage(canvas.toDataURL('image/jpeg', 0.9)));
+      };
+      img.src = dataUrl;
+    });
+  }
+
+  document.getElementById('rotate-left').addEventListener('click', function () {
+    if (!pendingImage) return;
+    rotateImage(pendingImage, -90).then(function (dataUrl) {
+      pendingImage = dataUrl;
+      preview.src = dataUrl;
+    });
+  });
+
+  document.getElementById('rotate-right').addEventListener('click', function () {
+    if (!pendingImage) return;
+    rotateImage(pendingImage, 90).then(function (dataUrl) {
+      pendingImage = dataUrl;
+      preview.src = dataUrl;
+    });
+  });
+
+  // 파일을 Object URL로 직접 로드 후 압축 (대용량 파일도 안전)
+  function compressFile(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var MAX = 800;
+        var w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('이미지 로드 실패')); };
+      img.src = url;
+    });
+  }
+
+  fileInput.addEventListener('change', function () {
+    var file = fileInput.files && fileInput.files[0];
+    if (!file) { pendingImage = null; previewWrap.classList.remove('show'); return; }
+    if (!file.type.startsWith('image/')) { alert('이미지 파일만 선택해 주세요.'); fileInput.value = ''; return; }
+    compressFile(file).then(function (dataUrl) {
+      pendingImage = dataUrl;
+      preview.src = dataUrl;
+      previewWrap.classList.add('show');
+    }).catch(function () {
+      alert('이미지를 불러오지 못했습니다. 다른 파일을 선택해 주세요.');
+    });
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!pendingImage) { alert('먼저 그림 파일을 선택해 주세요.'); return; }
+    var title = titleInput.value.trim();
+    var author = authorInput.value.trim();
+    var isUnknown = unknownDate.checked;
+    var date = isUnknown ? '' : dateInput.value;
+    if (!title || !author) { alert('제목과 이름을 입력해 주세요.'); return; }
+    if (!isUnknown && !date) { alert('그린 날짜를 입력하거나 "날짜를 알 수 없음"을 체크해 주세요.'); return; }
+    var item = { id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, unknownDate: isUnknown, image: pendingImage, createdAt: Date.now() };
+    dbPut(item).then(function () {
+      form.reset();
+      dateInput.value = new Date().toISOString().slice(0, 10);
+      dateInput.disabled = false;
+      dateInput.style.opacity = '1';
+      pendingImage = null;
+      previewWrap.classList.remove('show');
+      render();
+      switchTab('panel-gallery');
+    }).catch(function (err) {
+      alert('저장에 실패했습니다.\n오류: ' + (err ? (err.name + ': ' + err.message) : '알 수 없는 오류'));
+    });
+  });
+
+  gallery.addEventListener('click', function (e) {
+    var deleteBtn = e.target.closest('[data-action="delete"]');
+    if (deleteBtn) {
+      e.stopPropagation();
+      var id = deleteBtn.getAttribute('data-id');
+      if (confirm('이 그림을 삭제할까요?')) {
+        dbDelete(id).then(render);
+      }
+      return;
+    }
+    var item = e.target.closest('.gallery-item');
+    if (item) openModal(item.getAttribute('data-id'));
+  });
+
+  // ===== 모달 =====
+  var currentModalData = null;
+
+  function openModal(id) {
+    dbGetAll().then(function (list) {
+      var d = list.find(function (x) { return x.id === id; });
+      if (!d) return;
+      currentModalData = d;
+      modalImage.src = d.image;
+      modalImage.alt = d.title;
+      modalTitle.textContent = d.title;
+      modalAuthor.textContent = d.author;
+      modalDate.textContent = d.unknownDate ? '날짜 미상' : formatDate(d.date);
+      modal.classList.add('show');
+    });
+  }
+  function closeModal() { modal.classList.remove('show'); modalImage.src = ''; currentModalData = null; }
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
+
+  // 사진 1장 다운로드
+  document.getElementById('modal-download').addEventListener('click', function () {
+    if (!currentModalData) return;
+    var a = document.createElement('a');
+    a.href = currentModalData.image;
+    a.download = (currentModalData.title || '그림') + '.jpg';
+    a.click();
+  });
+
+  // ===== 백업 / 복원 =====
+  document.getElementById('btn-export').addEventListener('click', function () {
+    dbGetAll().then(function (list) {
+      if (list.length === 0) { alert('저장된 그림이 없습니다.'); return; }
+      var json = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), drawings: list });
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = '그림백업_' + today + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  });
+
+  document.getElementById('btn-import').addEventListener('click', function () {
+    document.getElementById('import-file').click();
+  });
+
+  document.getElementById('import-file').addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        var drawings = data.drawings || data;
+        if (!Array.isArray(drawings) || drawings.length === 0) { alert('올바른 백업 파일이 아닙니다.'); return; }
+        if (!confirm(drawings.length + '개의 그림을 복원합니다.\n기존 데이터에 추가됩니다. 계속할까요?')) return;
+        var promises = drawings.map(function (d) { return dbPut(d); });
+        Promise.all(promises).then(function () {
+          alert(drawings.length + '개의 그림이 복원되었습니다!');
+          render();
+          switchTab('panel-gallery');
+        }).catch(function () {
+          alert('일부 그림 복원에 실패했습니다.');
+        });
+      } catch (err) {
+        alert('파일을 읽는 중 오류가 발생했습니다.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  filterSelect.addEventListener('change', render);
+  filterMonth.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
