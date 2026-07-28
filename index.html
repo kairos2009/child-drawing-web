@@ -673,17 +673,32 @@
   });
 
   // ===== 백업 / 복원 =====
-  function triggerDownload(url, filename) {
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 1000);
+  function triggerDownload(dataUrl, filename) {
+    // data URL → Blob → Object URL 방식 (모바일 저장 호환성 향상)
+    try {
+      var parts = dataUrl.split(',');
+      var mime = parts[0].match(/:(.*?);/)[1];
+      var binary = atob(parts[1]);
+      var len = binary.length;
+      var buf = new Uint8Array(len);
+      for (var i = 0; i < len; i++) { buf[i] = binary.charCodeAt(i); }
+      var blob = new Blob([buf], { type: mime });
+      var objectUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objectUrl);
+      }, 1500);
+    } catch (e) {
+      // 폴백: 새 탭에서 열기 (iOS Safari)
+      var w = window.open('', '_blank');
+      if (w) { w.document.write('<img src="' + dataUrl + '" style="max-width:100%">'); }
+    }
   }
 
   document.getElementById('btn-export').addEventListener('click', function () {
