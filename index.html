@@ -123,8 +123,13 @@
     <h2>그림 추가하기</h2>
     <form id="upload-form">
       <div class="form-row">
-        <label for="file-input">그림 파일</label>
-        <input type="file" id="file-input" accept="image/*" required />
+        <label>그림 파일</label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btn-gallery" style="flex:1; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">🖼️ 사진보관함</button>
+          <button type="button" id="btn-camera" style="flex:1; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">📷 사진찍기</button>
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display:none;" />
+        <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display:none;" />
         <div class="preview-wrap" id="preview-wrap">
           <img id="preview" class="preview" alt="미리보기" />
           <div class="rotate-btns">
@@ -578,10 +583,10 @@
     });
   }
 
-  fileInput.addEventListener('change', function () {
-    var file = fileInput.files && fileInput.files[0];
+  function handleFileChange(input) {
+    var file = input.files && input.files[0];
     if (!file) { pendingImage = null; previewWrap.classList.remove('show'); return; }
-    if (!file.type.startsWith('image/')) { alert('이미지 파일만 선택해 주세요.'); fileInput.value = ''; return; }
+    if (!file.type.startsWith('image/')) { alert('이미지 파일만 선택해 주세요.'); input.value = ''; return; }
     compressFile(file).then(function (dataUrl) {
       pendingImage = dataUrl;
       preview.src = dataUrl;
@@ -589,7 +594,12 @@
     }).catch(function () {
       alert('이미지를 불러오지 못했습니다. 다른 파일을 선택해 주세요.');
     });
-  });
+  }
+
+  document.getElementById('btn-gallery').addEventListener('click', function () { fileInput.click(); });
+  document.getElementById('btn-camera').addEventListener('click', function () { document.getElementById('file-input-camera').click(); });
+  fileInput.addEventListener('change', function () { handleFileChange(fileInput); });
+  document.getElementById('file-input-camera').addEventListener('change', function () { handleFileChange(document.getElementById('file-input-camera')); });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
