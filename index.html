@@ -139,8 +139,14 @@
           <input type="text" id="title-input" placeholder="예: 우리 가족" required maxlength="60" />
         </div>
         <div class="form-row">
-          <label for="author-input">이름</label>
-          <input type="text" id="author-input" placeholder="예: 서연" required maxlength="30" />
+          <label>이름</label>
+          <div style="display:flex; gap:8px;">
+            <select id="author-input" style="flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:0.95rem; background:#fff;">
+              <option value="">이름 선택...</option>
+            </select>
+            <button type="button" id="btn-add-name" style="padding:10px 14px; background:#ff6b6b; color:#fff; border:none; border-radius:8px; font-size:1.2rem; cursor:pointer; flex-shrink:0; line-height:1;">＋</button>
+          </div>
+          <div id="name-tags" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;"></div>
         </div>
         <div class="form-row">
           <label for="date-input">그린 날짜</label>
@@ -166,7 +172,6 @@
     <div id="gallery" class="gallery"></div>
     <div id="empty" class="empty" style="display:none;">아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️</div>
   </section>
-</main>
 
   <!-- 백업 탭 -->
   <section class="card tab-panel" id="panel-backup">
@@ -195,7 +200,7 @@
         </div>
       </button>
     </div>
-    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.11_01.01</p>
+    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.28_01.02</p>
     <p style="text-align:center; font-size:0.75rem; color:#ccc;">projected by Progrea</p>
   </section>
 </main>
@@ -344,6 +349,58 @@
   var pendingImage = null;
   var currentRotation = 0;
   dateInput.value = new Date().toISOString().slice(0, 10);
+
+  // ===== 이름 관리 =====
+  var NAMES_KEY = 'child-drawing-names';
+
+  function loadNames() {
+    try { return JSON.parse(localStorage.getItem(NAMES_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function saveNames(list) {
+    localStorage.setItem(NAMES_KEY, JSON.stringify(list));
+  }
+
+  function renderNameSelect() {
+    var names = loadNames();
+    var cur = authorInput.value;
+    authorInput.innerHTML = '<option value="">이름 선택...</option>' +
+      names.map(function(n) { return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
+    if (names.indexOf(cur) !== -1) authorInput.value = cur;
+
+    // 이름 태그 (삭제 버튼 포함)
+    var tagsEl = document.getElementById('name-tags');
+    if (names.length === 0) { tagsEl.innerHTML = ''; return; }
+    tagsEl.innerHTML = names.map(function(n) {
+      return '<span style="display:inline-flex;align-items:center;gap:4px;background:#fff0ee;border:1px solid #ffccc9;border-radius:20px;padding:4px 10px;font-size:0.82rem;">' +
+        escapeHtml(n) +
+        '<button type="button" data-name="' + escapeHtml(n) + '" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;line-height:1;padding:0;">×</button>' +
+        '</span>';
+    }).join('');
+
+    tagsEl.querySelectorAll('button[data-name]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var name = btn.getAttribute('data-name');
+        if (!confirm('"' + name + '" 을(를) 삭제할까요?')) return;
+        var updated = loadNames().filter(function(n) { return n !== name; });
+        saveNames(updated);
+        renderNameSelect();
+      });
+    });
+  }
+
+  document.getElementById('btn-add-name').addEventListener('click', function() {
+    var name = prompt('추가할 이름을 입력하세요:');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    var names = loadNames();
+    if (names.indexOf(name) !== -1) { alert('이미 등록된 이름입니다.'); return; }
+    names.push(name);
+    saveNames(names);
+    renderNameSelect();
+    authorInput.value = name;
+  });
+
+  renderNameSelect();
 
   // 날짜 알 수 없음 체크박스
   unknownDate.addEventListener('change', function () {
@@ -543,7 +600,7 @@
     var item = { id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, unknownDate: isUnknown, image: pendingImage, createdAt: Date.now() };
     dbPut(item).then(function () {
       form.reset();
-      // form.reset() 후 날짜/체크박스 상태 명시적 복원
+      // form.reset() 후 상태 명시적 복원
       unknownDate.checked = false;
       dateInput.value = new Date().toISOString().slice(0, 10);
       dateInput.disabled = false;
@@ -551,6 +608,7 @@
       pendingImage = null;
       preview.src = '';
       previewWrap.classList.remove('show');
+      renderNameSelect(); // 이름 드롭다운 복원
       render();
       switchTab('panel-gallery');
     }).catch(function (err) {
