@@ -510,7 +510,10 @@
             '<div class="author">✏️ ' + escapeHtml(d.author) + '</div>' +
             '<div class="date">' + escapeHtml(d.unknownDate ? '날짜 미상' : formatDate(d.date)) + '</div>' +
           '</div>' +
-          '<div class="actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button></div>' +
+          '<div class="actions" style="display:flex;gap:6px;">' +
+            '<button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button>' +
+            '<button type="button" class="btn" style="background:#f0f8ff;color:#3a7bd5;border:1px solid #b3d0f5;padding:6px 12px;font-size:0.8rem;" data-action="download" data-id="' + escapeHtml(d.id) + '" data-title="' + escapeHtml(d.title) + '">⬇️</button>' +
+          '</div>' +
         '</div>';
       }).join('');
     });
@@ -624,6 +627,18 @@
       if (confirm('이 그림을 삭제할까요?')) {
         dbDelete(id).then(render);
       }
+      return;
+    }
+    var downloadBtn = e.target.closest('[data-action="download"]');
+    if (downloadBtn) {
+      e.stopPropagation();
+      var id = downloadBtn.getAttribute('data-id');
+      var title = downloadBtn.getAttribute('data-title') || '그림';
+      dbGetAll().then(function(list) {
+        var d = list.find(function(x) { return x.id === id; });
+        if (!d) return;
+        triggerDownload(d.image, title + '.jpg');
+      });
       return;
     }
     var item = e.target.closest('.gallery-item');
