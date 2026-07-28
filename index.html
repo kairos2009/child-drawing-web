@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>자녀 그림 관리</title>
+<title>자녀 그림 모바일 앨범</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #fafafa; color: #222; line-height: 1.5; min-height: 100vh; }
@@ -115,7 +115,7 @@
 </head>
 <body>
 <header>
-  <h1>🎨 자녀 그림 관리</h1>
+  <h1>🎨 자녀 그림 모바일 앨범</h1>
   <p>소중한 우리 아이의 그림을 기록해보세요</p>
 </header>
 <main>
@@ -125,8 +125,8 @@
       <div class="form-row">
         <label>그림 파일</label>
         <div style="display:flex; gap:8px;">
-          <button type="button" id="btn-gallery" style="flex:1; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">🖼️ 사진보관함</button>
-          <button type="button" id="btn-camera" style="flex:1; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">📷 사진찍기</button>
+          <label for="file-input" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">🖼️ 사진보관함</label>
+          <label for="file-input-camera" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; background:#fff; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer;">📷 사진찍기</label>
         </div>
         <input type="file" id="file-input" accept="image/*" style="display:none;" />
         <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display:none;" />
@@ -205,7 +205,7 @@
         </div>
       </button>
     </div>
-    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.28_01.02</p>
+    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.28_01.03</p>
     <p style="text-align:center; font-size:0.75rem; color:#ccc;">projected by Progrea</p>
   </section>
 </main>
@@ -596,8 +596,6 @@
     });
   }
 
-  document.getElementById('btn-gallery').addEventListener('click', function () { fileInput.click(); });
-  document.getElementById('btn-camera').addEventListener('click', function () { document.getElementById('file-input-camera').click(); });
   fileInput.addEventListener('change', function () { handleFileChange(fileInput); });
   document.getElementById('file-input-camera').addEventListener('change', function () { handleFileChange(document.getElementById('file-input-camera')); });
 
