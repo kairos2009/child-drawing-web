@@ -168,6 +168,7 @@
     </form>
   </section>
   <section class="card tab-panel active" id="panel-gallery">
+    <p style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">💡 이미지를 길게 누르면 핸드폰에 저장할 수 있어요.</p>
     <h2>갤러리</h2>
     <div class="filter-bar">
       <select id="filter-month"><option value="">전체 월</option></select>
@@ -205,8 +206,8 @@
         </div>
       </button>
     </div>
-    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.28_01.03</p>
-    <p style="text-align:center; font-size:0.75rem; color:#ccc;">projected by Progrea</p>
+    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#ccc;">v26.07.29_01.04</p>
+    <p style="text-align:center; font-size:0.75rem; color:#ccc;">by Progrea</p>
   </section>
 </main>
 
@@ -515,10 +516,7 @@
             '<div class="author">✏️ ' + escapeHtml(d.author) + '</div>' +
             '<div class="date">' + escapeHtml(d.unknownDate ? '날짜 미상' : formatDate(d.date)) + '</div>' +
           '</div>' +
-          '<div class="actions" style="display:flex;gap:6px;">' +
-            '<button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button>' +
-            '<button type="button" class="btn" style="background:#f0f8ff;color:#3a7bd5;border:1px solid #b3d0f5;padding:6px 12px;font-size:0.8rem;" data-action="download" data-id="' + escapeHtml(d.id) + '" data-title="' + escapeHtml(d.title) + '">⬇️</button>' +
-          '</div>' +
+          '<div class="actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button></div>' +
         '</div>';
       }).join('');
     });
