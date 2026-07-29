@@ -235,7 +235,6 @@
     <div class="modal-footer">
       <span><strong>이름</strong><span id="modal-author"></span></span>
       <span><strong>날짜</strong><span id="modal-date"></span></span>
-      <button type="button" class="btn-download-img" id="modal-download">⬇️ 다운로드</button>
     </div>
   </div>
 </div>
@@ -249,13 +248,12 @@
     });
   }
 
-  // ===== 저장소: IndexedDB 우선, 실패 시 localStorage 자동 전환 =====
   var DB_NAME = 'child-drawings-db';
   var DB_VERSION = 1;
   var STORE_NAME = 'drawings';
   var LS_KEY = 'child-drawings-v2';
   var db = null;
-  var useLS = false; // localStorage 모드 여부
+  var useLS = false;
 
   function openDB() {
     return new Promise(function (resolve, reject) {
@@ -275,7 +273,6 @@
     });
   }
 
-  // localStorage 헬퍼
   function lsGetAll() {
     try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; }
   }
@@ -293,7 +290,6 @@
         req.onerror = function () { reject(req.error); };
       });
     }).catch(function () {
-      // IndexedDB 실패 → localStorage
       return Promise.resolve(lsGetAll());
     });
   }
@@ -308,7 +304,6 @@
         tx.objectStore(STORE_NAME).put(item);
       });
     }).catch(function () {
-      // IndexedDB 실패 → localStorage
       var list = lsGetAll();
       var idx = list.findIndex(function(x){ return x.id === item.id; });
       if (idx >= 0) list[idx] = item; else list.push(item);
@@ -326,13 +321,11 @@
         req.onerror = function () { reject(req.error); };
       });
     }).catch(function () {
-      // IndexedDB 실패 → localStorage
       lsSave(lsGetAll().filter(function(x){ return x.id !== id; }));
       return Promise.resolve();
     });
   }
 
-  // ===== UI 요소 =====
   var fileInput = document.getElementById('file-input');
   var preview = document.getElementById('preview');
   var previewWrap = document.getElementById('preview-wrap');
@@ -356,7 +349,6 @@
   var currentRotation = 0;
   dateInput.value = new Date().toISOString().slice(0, 10);
 
-  // ===== 이름 관리 =====
   var NAMES_KEY = 'child-drawing-names';
 
   function loadNames() {
@@ -372,8 +364,6 @@
     authorInput.innerHTML = '<option value="">이름 선택...</option>' +
       names.map(function(n) { return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
     if (names.indexOf(cur) !== -1) authorInput.value = cur;
-
-    // 이름 태그 (삭제 버튼 포함)
     var tagsEl = document.getElementById('name-tags');
     if (names.length === 0) { tagsEl.innerHTML = ''; return; }
     tagsEl.innerHTML = names.map(function(n) {
@@ -382,7 +372,6 @@
         '<button type="button" data-name="' + escapeHtml(n) + '" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;line-height:1;padding:0;">×</button>' +
         '</span>';
     }).join('');
-
     tagsEl.querySelectorAll('button[data-name]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var name = btn.getAttribute('data-name');
@@ -408,7 +397,6 @@
 
   renderNameSelect();
 
-  // 날짜 알 수 없음 체크박스
   unknownDate.addEventListener('change', function () {
     dateInput.disabled = unknownDate.checked;
     dateInput.style.opacity = unknownDate.checked ? '0.4' : '1';
@@ -429,16 +417,6 @@
     b.addEventListener('click', function () { switchTab(b.getAttribute('data-target')); });
   });
 
-  function readFileAsDataURL(file) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () { resolve(reader.result); };
-      reader.onerror = function () { reject(reader.error); };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // 이미지를 최대 1200px, 품질 0.82로 압축
   function compressImage(dataUrl) {
     return new Promise(function (resolve) {
       var img = new Image();
@@ -472,12 +450,11 @@
 
   function getMonthKey(d) {
     if (!d.date || d.unknownDate) return '';
-    return d.date.slice(0, 7); // "YYYY-MM"
+    return d.date.slice(0, 7);
   }
 
   function render() {
     dbGetAll().then(function (list) {
-      // 월 목록 업데이트
       var months = Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();
       var curMonth = filterMonth.value;
       filterMonth.innerHTML = '<option value="">전체 월</option>' +
@@ -487,14 +464,12 @@
         }).join('');
       if (months.indexOf(curMonth) !== -1) filterMonth.value = curMonth;
 
-      // 이름 목록 업데이트
       var authors = Array.from(new Set(list.map(function (d) { return d.author; }))).sort();
       var curAuthor = filterSelect.value;
       filterSelect.innerHTML = '<option value="">전체 이름</option>' +
         authors.map(function (a) { return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>'; }).join('');
       if (authors.indexOf(curAuthor) !== -1) filterSelect.value = curAuthor;
 
-      // 필터 적용
       var filtered = list;
       if (filterMonth.value) filtered = filtered.filter(function (d) { return getMonthKey(d) === filterMonth.value; });
       if (filterSelect.value) filtered = filtered.filter(function (d) { return d.author === filterSelect.value; });
@@ -522,7 +497,6 @@
     });
   }
 
-  // 이미지 회전 후 압축까지 적용
   function rotateImage(dataUrl, deg) {
     return new Promise(function (resolve) {
       var img = new Image();
@@ -535,7 +509,6 @@
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate(rad);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        // 회전 후 재압축
         resolve(compressImage(canvas.toDataURL('image/jpeg', 0.9)));
       };
       img.src = dataUrl;
@@ -558,7 +531,6 @@
     });
   });
 
-  // 파일을 Object URL로 직접 로드 후 압축 (대용량 파일도 안전)
   function compressFile(file) {
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file);
@@ -609,7 +581,6 @@
     var item = { id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, unknownDate: isUnknown, image: pendingImage, createdAt: Date.now() };
     dbPut(item).then(function () {
       form.reset();
-      // form.reset() 후 상태 명시적 복원
       unknownDate.checked = false;
       dateInput.value = new Date().toISOString().slice(0, 10);
       dateInput.disabled = false;
@@ -617,7 +588,7 @@
       pendingImage = null;
       preview.src = '';
       previewWrap.classList.remove('show');
-      renderNameSelect(); // 이름 드롭다운 복원
+      renderNameSelect();
       render();
       switchTab('panel-gallery');
     }).catch(function (err) {
@@ -635,23 +606,10 @@
       }
       return;
     }
-    var downloadBtn = e.target.closest('[data-action="download"]');
-    if (downloadBtn) {
-      e.stopPropagation();
-      var id = downloadBtn.getAttribute('data-id');
-      var title = downloadBtn.getAttribute('data-title') || '그림';
-      dbGetAll().then(function(list) {
-        var d = list.find(function(x) { return x.id === id; });
-        if (!d) return;
-        triggerDownload(d.image, title + '.jpg');
-      });
-      return;
-    }
     var item = e.target.closest('.gallery-item');
     if (item) openModal(item.getAttribute('data-id'));
   });
 
-  // ===== 모달 =====
   var currentModalData = null;
 
   function openModal(id) {
@@ -672,39 +630,17 @@
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
 
-  // 사진 1장 다운로드
-  document.getElementById('modal-download').addEventListener('click', function () {
-    if (!currentModalData) return;
-    triggerDownload(currentModalData.image, (currentModalData.title || '그림') + '.jpg');
-  });
-
-  // ===== 백업 / 복원 =====
-  function triggerDownload(dataUrl, filename) {
-    // data URL → Blob → Object URL 방식 (모바일 저장 호환성 향상)
-    try {
-      var parts = dataUrl.split(',');
-      var mime = parts[0].match(/:(.*?);/)[1];
-      var binary = atob(parts[1]);
-      var len = binary.length;
-      var buf = new Uint8Array(len);
-      for (var i = 0; i < len; i++) { buf[i] = binary.charCodeAt(i); }
-      var blob = new Blob([buf], { type: mime });
-      var objectUrl = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = filename;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(objectUrl);
-      }, 1500);
-    } catch (e) {
-      // 폴백: 새 탭에서 열기 (iOS Safari)
-      var w = window.open('', '_blank');
-      if (w) { w.document.write('<img src="' + dataUrl + '" style="max-width:100%">'); }
-    }
+  function triggerDownload(url, filename) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+    }, 1500);
   }
 
   document.getElementById('btn-export').addEventListener('click', function () {
@@ -762,7 +698,6 @@
       tx.onerror = function () { alert('초기화에 실패했습니다.'); };
       tx.objectStore(STORE_NAME).clear();
     }).catch(function () {
-      // localStorage 모드
       try {
         localStorage.removeItem(LS_KEY);
         alert('초기화가 완료되었습니다.');
@@ -780,4 +715,4 @@
 })();
 </script>
 </body>
-</html>
+ </html>
