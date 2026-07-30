@@ -6,11 +6,12 @@
 <title>자녀 그림 모바일 앨범</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #f5f6fa; color: #333; line-height: 1.5; min-height: 100vh; overscroll-behavior: none; }
-  header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  html { height: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #f5f6fa; color: #333; line-height: 1.5; height: 100%; display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none; }
+  header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0; }
   header h1 { font-size: 1.5rem; }
   header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
-  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+  main { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
   .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 20px; margin-bottom: 20px; }
   .card h2 { font-size: 1.1rem; margin-bottom: 14px; color: #444; }
   .form-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
@@ -173,6 +174,11 @@
     <div class="changelog">
       <div class="changelog-toggle" id="changelog-toggle"><span>📋 버전 및 변경이력</span><span class="arrow">▼</span></div>
       <div class="changelog-list" id="changelog-list">
+        <div class="changelog-item">
+          <span class="cl-ver">v26.07.30_01.05</span>
+          <span class="cl-date">[2026.07.30]</span>
+          전체 화면 흔들림 수정(뷰포트 고정 + 내부 스크롤)
+        </div>
         <div class="changelog-item"><span class="cl-ver">v26.07.30_01.04</span><span class="cl-date">[2026.07.30]</span>탭바 흔들림 수정 방식 개선(GPU 레이어 합성) / 레이아웃 비율 복원</div>
         <div class="changelog-item"><span class="cl-ver">v26.07.30_01.03</span><span class="cl-date">[2026.07.30]</span>Service Worker 캐시 갱신 전략 개선(Safari 구버전 캐시 문제 해결)</div>
         <div class="changelog-item"><span class="cl-ver">v26.07.30_01.02</span><span class="cl-date">[2026.07.30]</span>저장 완료 토스트 알림 추가 / 그림 제목·날짜·이름 수정 기능 추가 / 변경이력 섹션 추가 / Safari 탭바 가림 현상 수정</div>
@@ -180,7 +186,7 @@
         <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
       </div>
     </div>
-    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.04 · by Progrea</p>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.05 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
@@ -218,7 +224,7 @@ function renderNameTags(){var names=loadNames();var tagsEl=document.getElementBy
 document.getElementById('btn-add-name').addEventListener('click',function(){var name=prompt('추가할 이름을 입력하세요:');if(!name||!name.trim())return;name=name.trim();var names=loadNames();if(names.indexOf(name)!==-1){alert('이미 등록된 이름입니다.');return;}names.push(name);saveNames(names);renderNameSelect(authorInput);renderNameTags();authorInput.value=name;});
 renderNameSelect(authorInput);renderNameTags();
 unknownDate.addEventListener('change',function(){dateInput.disabled=unknownDate.checked;dateInput.style.opacity=unknownDate.checked?'0.4':'1';if(unknownDate.checked)dateInput.value='';else dateInput.value=new Date().toISOString().slice(0,10);});
-function switchTab(targetId){document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('active',p.id===targetId);});document.querySelectorAll('.tab-btn').forEach(function(b){var isActive=b.getAttribute('data-target')===targetId;b.classList.toggle('active',isActive);b.setAttribute('aria-selected',isActive?'true':'false');});window.scrollTo({top:0,behavior:'auto'});}
+function switchTab(targetId){document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('active',p.id===targetId);});document.querySelectorAll('.tab-btn').forEach(function(b){var isActive=b.getAttribute('data-target')===targetId;b.classList.toggle('active',isActive);b.setAttribute('aria-selected',isActive?'true':'false');});window.var mainEl=document.querySelector('main');if(mainEl)mainEl.scrollTop=0;}
 document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('click',function(){switchTab(b.getAttribute('data-target'));});});
 function compressFile(file){return new Promise(function(resolve,reject){var url=URL.createObjectURL(file);var img=new Image();img.onload=function(){URL.revokeObjectURL(url);var MAX=800,w=img.width,h=img.height;if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',0.72));};img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('이미지 로드 실패'));};img.src=url;});}
 function rotateImage(dataUrl,deg){return new Promise(function(resolve){var img=new Image();img.onload=function(){var canvas=document.createElement('canvas');canvas.width=img.height;canvas.height=img.width;var ctx=canvas.getContext('2d');ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(deg*Math.PI/180);ctx.drawImage(img,-img.width/2,-img.height/2);resolve(canvas.toDataURL('image/jpeg',0.9));};img.src=dataUrl;});}
