@@ -87,10 +87,10 @@
     .form-grid .form-row { margin-bottom: 0; }
     header h1 { font-size: 1.8rem; }
   }
-  main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  main { width: 100%; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
-  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #eee; display: flex; z-index: 50; box-shadow: 0 -2px 12px rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom); transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0); will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .tabbar { flex-shrink: 0; background: #fff; border-top: 1px solid #eee; display: flex; z-index: 50; box-shadow: 0 -2px 12px rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom); }
   .tab-btn { flex: 1; background: transparent; border: none; padding: 12px 8px 10px; font-size: 0.85rem; font-weight: 600; color: #bbb; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.15s; }
   .tab-btn .tab-icon { font-size: 1.4rem; line-height: 1; }
   .tab-btn.active { color: #ff6b6b; }
@@ -175,7 +175,7 @@
       <div class="changelog-toggle" id="changelog-toggle"><span>📋 버전 및 변경이력</span><span class="arrow">▼</span></div>
       <div class="changelog-list" id="changelog-list">
         <div class="changelog-item">
-          <span class="cl-ver">v26.07.30_01.06</span><span class="cl-date">[2026.07.30]</span>백업 복원 시 중복 그림 건너뛰기 적용</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.05</span>
+          <span class="cl-ver">v26.07.30_01.07</span><span class="cl-date">[2026.07.30]</span>탭바 클릭 불가 버그 수정(flex 자식으로 전환)</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.06</span><span class="cl-date">[2026.07.30]</span>백업 복원 시 중복 그림 건너뛰기 적용</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.05</span>
           <span class="cl-date">[2026.07.30]</span>
           전체 화면 흔들림 수정(뷰포트 고정 + 내부 스크롤)
         </div>
@@ -186,7 +186,7 @@
         <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
       </div>
     </div>
-    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.06 · by Progrea</p>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.07 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
