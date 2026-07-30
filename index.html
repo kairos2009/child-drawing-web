@@ -175,7 +175,7 @@
       <div class="changelog-toggle" id="changelog-toggle"><span>📋 버전 및 변경이력</span><span class="arrow">▼</span></div>
       <div class="changelog-list" id="changelog-list">
         <div class="changelog-item">
-          <span class="cl-ver">v26.07.30_01.05</span>
+          <span class="cl-ver">v26.07.30_01.06</span><span class="cl-date">[2026.07.30]</span>백업 복원 시 중복 그림 건너뛰기 적용</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.05</span>
           <span class="cl-date">[2026.07.30]</span>
           전체 화면 흔들림 수정(뷰포트 고정 + 내부 스크롤)
         </div>
@@ -186,7 +186,7 @@
         <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
       </div>
     </div>
-    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.05 · by Progrea</p>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.06 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
@@ -253,7 +253,7 @@ var clToggle=document.getElementById('changelog-toggle');var clList=document.get
 function triggerDownload(url,filename){var a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);if(url.startsWith('blob:'))URL.revokeObjectURL(url);},1500);}
 document.getElementById('btn-export').addEventListener('click',function(){dbGetAll().then(function(list){if(list.length===0){showToast('저장된 그림이 없습니다.','error');return;}var json=JSON.stringify({version:1,exportedAt:new Date().toISOString(),drawings:list});var blob=new Blob([json],{type:'application/json'});var today=new Date().toISOString().slice(0,10);triggerDownload(URL.createObjectURL(blob),'그림백업_'+today+'.json');showToast('✅ '+list.length+'개 백업 완료!','success');});});
 document.getElementById('btn-import').addEventListener('click',function(){document.getElementById('import-file').click();});
-document.getElementById('import-file').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result),drawings=data.drawings||data;if(!Array.isArray(drawings)||drawings.length===0){showToast('올바른 백업 파일이 아닙니다.','error');return;}if(!confirm(drawings.length+'개의 그림을 복원합니다. 기존 데이터에 추가됩니다. 계속할까요?'))return;Promise.all(drawings.map(function(d){return dbPut(d);})).then(function(){render();switchTab('panel-gallery');showToast('✅ '+drawings.length+'개 복원 완료!','success');}).catch(function(){showToast('일부 그림 복원에 실패했습니다.','error');});}catch(err){showToast('파일을 읽는 중 오류가 발생했습니다.','error');}};reader.readAsText(file);e.target.value='';});
+document.getElementById('import-file').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result),drawings=data.drawings||data;if(!Array.isArray(drawings)||drawings.length===0){showToast('올바른 백업 파일이 아닙니다.','error');return;}if(!confirm(drawings.length+'개의 그림을 복원합니다. 이미 존재하는 그림은 건너뜁니다. 계속할까요?'))return;dbGetAll().then(function(existing){var existingIds=new Set(existing.map(function(x){return x.id;}));var toAdd=drawings.filter(function(d){return!existingIds.has(d.id);});var skipped=drawings.length-toAdd.length;if(toAdd.length===0){showToast('추가할 그림이 없습니다. ('+skipped+'개 이미 존재)','error');return;}return Promise.all(toAdd.map(function(d){return dbPut(d);})).then(function(){render();switchTab('panel-gallery');var msg='✅ '+toAdd.length+'개 복원 완료!';if(skipped>0)msg+=' ('+skipped+'개 중복 건너뜀)';showToast(msg,'success');});}).catch(function(){showToast('일부 그림 복원에 실패했습니다.','error');});}catch(err){showToast('파일을 읽는 중 오류가 발생했습니다.','error');}};reader.readAsText(file);e.target.value='';});
 document.getElementById('btn-reset').addEventListener('click',function(){if(!confirm('모든 그림 데이터가 삭제됩니다. 복구 불가능합니다. 정말 초기화하시겠습니까?'))return;if(!confirm('한 번 더 확인합니다. 정말로 전체 삭제하시겠습니까?'))return;openDB().then(function(d){var tx=d.transaction(STORE_NAME,'readwrite');tx.oncomplete=function(){try{localStorage.removeItem(LS_KEY);}catch(e){}render();switchTab('panel-gallery');showToast('초기화 완료');};tx.onerror=function(){showToast('초기화에 실패했습니다.','error');};tx.objectStore(STORE_NAME).clear();}).catch(function(){try{localStorage.removeItem(LS_KEY);render();switchTab('panel-gallery');showToast('초기화 완료');}catch(e){showToast('초기화에 실패했습니다.','error');}});});
 filterSelect.addEventListener('change',render);filterMonth.addEventListener('change',render);render();
 })();
