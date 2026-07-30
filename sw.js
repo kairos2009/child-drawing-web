@@ -1,4 +1,4 @@
-const CACHE_NAME = 'child-drawings-cache-v26073002';
+const CACHE_NAME = 'child-drawings-cache-v26073009';
 const CORE_ASSETS = [
   '/child-drawing-web/',
   '/child-drawing-web/index.html',
