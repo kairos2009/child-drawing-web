@@ -7,7 +7,8 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { height: 100%; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #f5f6fa; color: #333; line-height: 1.5; height: 100%; display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #f5f6fa; color: #333; line-height: 1.5; overscroll-behavior: none; }
+  #app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; overflow: hidden; }
   header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0; }
   header h1 { font-size: 1.5rem; }
   header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
@@ -108,6 +109,7 @@
 <link rel="icon" href="./icon.svg" type="image/svg+xml" />
 </head>
 <body>
+<div id="app">
 <header>
   <h1>🎨 자녀 그림 모바일 앨범</h1>
   <p>소중한 우리 아이의 그림을 기록해보세요</p>
@@ -190,7 +192,7 @@
         <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
       </div>
     </div>
-    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.08 · by Progrea</p>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.09 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
@@ -198,6 +200,7 @@
   <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false"><span class="tab-icon">➕</span><span>그림 저장</span></button>
   <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false"><span class="tab-icon">💾</span><span>백업</span></button>
 </nav>
+</div>
 <div id="modal" class="modal" role="dialog" aria-modal="true"><div class="modal-content"><div class="modal-header"><h3 id="modal-title"></h3><button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button></div><div class="modal-body"><img id="modal-image" alt="" /></div><div class="modal-footer"><span><strong>이름</strong><span id="modal-author"></span></span><span><strong>날짜</strong><span id="modal-date"></span></span><button type="button" class="btn-edit" id="modal-edit-btn">✏️ 수정</button></div></div></div>
 <div id="edit-modal" class="modal" role="dialog" aria-modal="true"><div class="modal-content" style="max-width:480px;"><div class="modal-header"><h3>그림 정보 수정</h3><button type="button" class="btn btn-close" id="edit-modal-close" aria-label="닫기">&times;</button></div><div class="edit-modal-body"><div class="form-row"><label for="edit-title">제목</label><input type="text" id="edit-title" maxlength="60" /></div><div class="form-row"><label for="edit-author">이름</label><select id="edit-author" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;background:#fff;color:#333;width:100%;"></select></div><div class="form-row"><label for="edit-date">그린 날짜</label><input type="date" id="edit-date" /><div class="unknown-date-row"><input type="checkbox" id="edit-unknown-date" /><label for="edit-unknown-date">그린 날짜를 알 수 없음</label></div></div><div style="display:flex;gap:10px;margin-top:4px;"><button type="button" class="btn btn-primary" id="edit-save-btn" style="flex:1;">저장</button><button type="button" class="btn btn-secondary" id="edit-cancel-btn">취소</button></div></div></div></div>
 <div id="toast" class="toast"></div>
