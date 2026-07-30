@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>자녀 그림 모바일 앨범</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,8 +21,12 @@
   .btn-primary { background: #ff6b6b; color: #fff; }
   .btn-primary:hover { background: #ff5555; box-shadow: 0 2px 8px rgba(255,107,107,0.35); }
   .btn-primary:active { transform: translateY(1px); }
+  .btn-secondary { background: #f0f0f0; color: #555; border: 1px solid #ddd; padding: 9px 16px; font-size: 0.9rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+  .btn-secondary:hover { background: #e8e8e8; }
   .btn-danger { background: transparent; color: #e63946; border: 1px solid #e63946; padding: 6px 12px; font-size: 0.8rem; }
   .btn-danger:hover { background: #e63946; color: #fff; }
+  .btn-edit { background: transparent; color: #ff9a9e; border: 1px solid #ff9a9e; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .btn-edit:hover { background: #ff9a9e; color: #fff; }
   .btn-close { background: transparent; color: #fff; font-size: 2rem; padding: 0 12px; line-height: 1; }
   .preview-wrap { display: none; margin-top: 8px; }
   .preview-wrap.show { display: block; }
@@ -40,7 +44,6 @@
   .backup-btn .backup-desc { font-size: 0.78rem; color: #999; font-weight: 400; margin-top: 2px; }
   .backup-btn-inner { display: flex; flex-direction: column; text-align: left; }
   .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .filter-bar label { font-size: 0.85rem; color: #666; font-weight: 600; }
   .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #333; font-size: 0.9rem; min-width: 140px; }
   .count { margin-left: auto; color: #999; font-size: 0.85rem; }
   .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
@@ -51,7 +54,7 @@
   .gallery-item .title { font-weight: 700; font-size: 0.95rem; color: #333; }
   .gallery-item .author { font-size: 0.82rem; color: #ff6b6b; }
   .gallery-item .date { font-size: 0.75rem; color: #aaa; }
-  .gallery-item .actions { padding: 0 12px 12px; }
+  .gallery-item .actions { padding: 0 12px 12px; display: flex; gap: 6px; }
   .empty { text-align: center; padding: 40px 20px; color: #bbb; font-size: 0.95rem; }
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
   .modal.show { display: flex; }
@@ -60,41 +63,30 @@
   .modal-header h3 { font-size: 1rem; font-weight: 600; }
   .modal-body { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: auto; }
   .modal-body img { max-width: 100%; max-height: 70vh; object-fit: contain; }
-  .modal-footer { padding: 12px 16px; color: #666; background: #f9f9f9; font-size: 0.9rem; display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid #eee; }
+  .modal-footer { padding: 12px 16px; color: #666; background: #f9f9f9; font-size: 0.9rem; display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid #eee; align-items: center; }
   .modal-footer span strong { color: #444; margin-right: 4px; }
-  @media (min-width: 640px) {
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-grid .form-row { margin-bottom: 0; }
-    header h1 { font-size: 1.8rem; }
-  }
+  .edit-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .edit-modal-body .form-row { margin-bottom: 0; }
+  .toast { position: fixed; bottom: calc(72px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; white-space: nowrap; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .toast.success { background: #2ecc71; }
+  .toast.error { background: #e63946; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .changelog { margin-top: 20px; border-top: 1px solid #eee; padding-top: 16px; }
+  .changelog-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; color: #aaa; font-size: 0.82rem; font-weight: 600; padding: 4px 0; user-select: none; }
+  .changelog-toggle .arrow { transition: transform 0.2s; }
+  .changelog-toggle.open .arrow { transform: rotate(180deg); }
+  .changelog-list { display: none; margin-top: 10px; }
+  .changelog-list.show { display: block; }
+  .changelog-item { font-size: 0.78rem; color: #aaa; line-height: 1.7; padding: 3px 0; border-bottom: 1px dotted #f0f0f0; }
+  .changelog-item:last-child { border-bottom: none; }
+  .changelog-item .cl-ver { color: #ff9a9e; font-weight: 700; margin-right: 6px; }
+  .changelog-item .cl-date { color: #bbb; margin-right: 6px; }
+  @media (min-width: 640px) { .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .form-grid .form-row { margin-bottom: 0; } header h1 { font-size: 1.8rem; } }
   main { padding-bottom: 84px; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
-  .tabbar {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    background: #fff;
-    border-top: 1px solid #eee;
-    display: flex;
-    z-index: 50;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .tab-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 12px 8px 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #bbb;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    transition: color 0.15s;
-  }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #eee; display: flex; z-index: 50; box-shadow: 0 -2px 12px rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom); }
+  .tab-btn { flex: 1; background: transparent; border: none; padding: 12px 8px 10px; font-size: 0.85rem; font-weight: 600; color: #bbb; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: color 0.15s; }
   .tab-btn .tab-icon { font-size: 1.4rem; line-height: 1; }
   .tab-btn.active { color: #ff6b6b; }
   .tab-btn:focus { outline: none; }
@@ -118,7 +110,7 @@
     <h2>그림 추가하기</h2>
     <form id="upload-form">
       <div class="form-row">
-        <label for="file-input" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; background:#f5f5f5; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; cursor:pointer; color:#555;">🖼️ 사진보관함</label>
+        <label for="file-input" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;cursor:pointer;color:#555;">🖼️ 사진보관함</label>
         <input type="file" id="file-input" accept="image/*" style="display:none;" />
         <div class="preview-wrap" id="preview-wrap">
           <img id="preview" class="preview" alt="미리보기" />
@@ -135,13 +127,11 @@
         </div>
         <div class="form-row">
           <label>이름</label>
-          <div style="display:flex; gap:8px;">
-            <select id="author-input" style="flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:0.95rem; background:#fff; color:#333;">
-              <option value="">이름 선택...</option>
-            </select>
-            <button type="button" id="btn-add-name" style="padding:10px 14px; background:#ff6b6b; color:#fff; border:none; border-radius:8px; font-size:1.2rem; cursor:pointer; flex-shrink:0; line-height:1;">＋</button>
+          <div style="display:flex;gap:8px;">
+            <select id="author-input" style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;background:#fff;color:#333;"><option value="">이름 선택...</option></select>
+            <button type="button" id="btn-add-name" style="padding:10px 14px;background:#ff6b6b;color:#fff;border:none;border-radius:8px;font-size:1.2rem;cursor:pointer;flex-shrink:0;line-height:1;">＋</button>
           </div>
-          <div id="name-tags" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;"></div>
+          <div id="name-tags" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
         </div>
         <div class="form-row">
           <label for="date-input">그린 날짜</label>
@@ -152,13 +142,11 @@
           </div>
         </div>
       </div>
-      <div style="margin-top:14px;">
-        <button type="submit" class="btn btn-primary">저장하기</button>
-      </div>
+      <div style="margin-top:14px;"><button type="submit" class="btn btn-primary">저장하기</button></div>
     </form>
   </section>
   <section class="card tab-panel active" id="panel-gallery">
-    <p style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">💡 이미지를 길게 누르면 핸드폰에 저장할 수 있어요.</p>
+    <p style="font-size:0.75rem;color:#aaa;margin-bottom:6px;">💡 이미지를 길게 누르면 핸드폰에 저장할 수 있어요.</p>
     <h2>갤러리</h2>
     <div class="filter-bar">
       <select id="filter-month"><option value="">전체 월</option></select>
@@ -173,402 +161,128 @@
     <div class="backup-section">
       <button type="button" class="backup-btn" id="btn-export">
         <span class="backup-icon">⬇️</span>
-        <div class="backup-btn-inner">
-          <span>데이터 백업 (다운로드)</span>
-          <span class="backup-desc">모든 그림을 파일로 저장합니다. 핸드폰 변경 전 꼭 백업하세요.</span>
-        </div>
+        <div class="backup-btn-inner"><span>데이터 백업 (다운로드)</span><span class="backup-desc">모든 그림을 파일로 저장합니다. 핸드폰 변경 전 꼭 백업하세요.</span></div>
       </button>
       <button type="button" class="backup-btn" id="btn-import">
         <span class="backup-icon">⬆️</span>
-        <div class="backup-btn-inner">
-          <span>데이터 복원 (불러오기)</span>
-          <span class="backup-desc">백업 파일을 선택하면 그림이 복원됩니다.</span>
-        </div>
+        <div class="backup-btn-inner"><span>데이터 복원 (불러오기)</span><span class="backup-desc">백업 파일을 선택하면 그림이 복원됩니다.</span></div>
       </button>
       <input type="file" id="import-file" accept=".json" hidden />
       <button type="button" class="backup-btn" id="btn-reset" style="border-color:#e63946;">
         <span class="backup-icon">🗑️</span>
-        <div class="backup-btn-inner">
-          <span style="color:#e63946;">전체 초기화</span>
-          <span class="backup-desc">모든 그림 데이터를 삭제합니다. 복구 불가능합니다.</span>
-        </div>
+        <div class="backup-btn-inner"><span style="color:#e63946;">전체 초기화</span><span class="backup-desc">모든 그림 데이터를 삭제합니다. 복구 불가능합니다.</span></div>
       </button>
     </div>
-    <p style="margin-top:20px; text-align:center; font-size:0.75rem; color:#bbb;">v26.07.29_01.04</p>
-    <p style="text-align:center; font-size:0.75rem; color:#bbb;">by Progrea</p>
+    <div class="changelog">
+      <div class="changelog-toggle" id="changelog-toggle"><span>📋 버전 및 변경이력</span><span class="arrow">▼</span></div>
+      <div class="changelog-list" id="changelog-list">
+        <div class="changelog-item"><span class="cl-ver">v26.07.30_01.02</span><span class="cl-date">[2026.07.30]</span>저장 완료 토스트 알림 / 그림 제목·날짜·이름 수정 기능 / 변경이력 섹션 / Safari 탭바 가림 현상 수정</div>
+        <div class="changelog-item"><span class="cl-ver">v26.07.29_01.04</span><span class="cl-date">[2026.07.29]</span>라이트 모드 전환 / 사진보관함 단독 버튼 (사진찍기 제거)</div>
+        <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.02 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
-  <button type="button" class="tab-btn active" data-target="panel-gallery" role="tab" aria-selected="true">
-    <span class="tab-icon" aria-hidden="true">🖼️</span>
-    <span>갤러리</span>
-  </button>
-  <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false">
-    <span class="tab-icon" aria-hidden="true">➕</span>
-    <span>그림 저장</span>
-  </button>
-  <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false">
-    <span class="tab-icon" aria-hidden="true">💾</span>
-    <span>백업</span>
-  </button>
+  <button type="button" class="tab-btn active" data-target="panel-gallery" role="tab" aria-selected="true"><span class="tab-icon">🖼️</span><span>갤러리</span></button>
+  <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false"><span class="tab-icon">➕</span><span>그림 저장</span></button>
+  <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false"><span class="tab-icon">💾</span><span>백업</span></button>
 </nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true">
   <div class="modal-content">
-    <div class="modal-header">
-      <h3 id="modal-title"></h3>
-      <button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button>
-    </div>
+    <div class="modal-header"><h3 id="modal-title"></h3><button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button></div>
     <div class="modal-body"><img id="modal-image" alt="" /></div>
     <div class="modal-footer">
       <span><strong>이름</strong><span id="modal-author"></span></span>
       <span><strong>날짜</strong><span id="modal-date"></span></span>
+      <button type="button" class="btn-edit" id="modal-edit-btn">✏️ 수정</button>
     </div>
   </div>
 </div>
+<div id="edit-modal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content" style="max-width:480px;">
+    <div class="modal-header"><h3>그림 정보 수정</h3><button type="button" class="btn btn-close" id="edit-modal-close" aria-label="닫기">&times;</button></div>
+    <div class="edit-modal-body">
+      <div class="form-row"><label for="edit-title">제목</label><input type="text" id="edit-title" maxlength="60" /></div>
+      <div class="form-row"><label for="edit-author">이름</label><select id="edit-author" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;background:#fff;color:#333;width:100%;"></select></div>
+      <div class="form-row">
+        <label for="edit-date">그린 날짜</label>
+        <input type="date" id="edit-date" />
+        <div class="unknown-date-row"><input type="checkbox" id="edit-unknown-date" /><label for="edit-unknown-date">그린 날짜를 알 수 없음</label></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button type="button" class="btn btn-primary" id="edit-save-btn" style="flex:1;">저장</button>
+        <button type="button" class="btn btn-secondary" id="edit-cancel-btn">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
 <script>
-(function () {
-  'use strict';
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js').catch(function (e) { console.warn('SW 등록 실패', e); });
-    });
-  }
-  var DB_NAME = 'child-drawings-db';
-  var DB_VERSION = 1;
-  var STORE_NAME = 'drawings';
-  var LS_KEY = 'child-drawings-v2';
-  var db = null;
-  var useLS = false;
-  function openDB() {
-    return new Promise(function (resolve, reject) {
-      if (db) { resolve(db); return; }
-      if (useLS) { reject(new Error('LS mode')); return; }
-      try {
-        var req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = function (e) {
-          var d = e.target.result;
-          if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        };
-        req.onsuccess = function (e) { db = e.target.result; resolve(db); };
-        req.onerror = function () { useLS = true; reject(req.error); };
-      } catch (e) { useLS = true; reject(e); }
-    });
-  }
-  function lsGetAll() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } }
-  function lsSave(list) { try { localStorage.setItem(LS_KEY, JSON.stringify(list)); return true; } catch(e) { throw new Error('저장 공간 부족: ' + e.message); } }
-  function dbGetAll() {
-    return openDB().then(function (d) {
-      return new Promise(function (resolve, reject) {
-        var tx = d.transaction(STORE_NAME, 'readonly');
-        var req = tx.objectStore(STORE_NAME).getAll();
-        req.onsuccess = function () { resolve(req.result); };
-        req.onerror = function () { reject(req.error); };
-      });
-    }).catch(function () { return Promise.resolve(lsGetAll()); });
-  }
-  function dbPut(item) {
-    return openDB().then(function (d) {
-      return new Promise(function (resolve, reject) {
-        var tx = d.transaction(STORE_NAME, 'readwrite');
-        tx.oncomplete = function () { resolve(); };
-        tx.onerror = function () { reject(tx.error); };
-        tx.onabort = function () { reject(tx.error || new Error('저장 취소됨')); };
-        tx.objectStore(STORE_NAME).put(item);
-      });
-    }).catch(function () {
-      var list = lsGetAll();
-      var idx = list.findIndex(function(x){ return x.id === item.id; });
-      if (idx >= 0) list[idx] = item; else list.push(item);
-      lsSave(list);
-      return Promise.resolve();
-    });
-  }
-  function dbDelete(id) {
-    return openDB().then(function (d) {
-      return new Promise(function (resolve, reject) {
-        var tx = d.transaction(STORE_NAME, 'readwrite');
-        var req = tx.objectStore(STORE_NAME).delete(id);
-        req.onsuccess = function () { resolve(); };
-        req.onerror = function () { reject(req.error); };
-      });
-    }).catch(function () { lsSave(lsGetAll().filter(function(x){ return x.id !== id; })); return Promise.resolve(); });
-  }
-  var fileInput = document.getElementById('file-input');
-  var preview = document.getElementById('preview');
-  var previewWrap = document.getElementById('preview-wrap');
-  var titleInput = document.getElementById('title-input');
-  var authorInput = document.getElementById('author-input');
-  var dateInput = document.getElementById('date-input');
-  var unknownDate = document.getElementById('unknown-date');
-  var form = document.getElementById('upload-form');
-  var gallery = document.getElementById('gallery');
-  var emptyMsg = document.getElementById('empty');
-  var filterSelect = document.getElementById('filter-author');
-  var filterMonth = document.getElementById('filter-month');
-  var countLabel = document.getElementById('count-label');
-  var modal = document.getElementById('modal');
-  var modalImage = document.getElementById('modal-image');
-  var modalTitle = document.getElementById('modal-title');
-  var modalAuthor = document.getElementById('modal-author');
-  var modalDate = document.getElementById('modal-date');
-  var modalClose = document.getElementById('modal-close');
-  var pendingImage = null;
-  dateInput.value = new Date().toISOString().slice(0, 10);
-  var NAMES_KEY = 'child-drawing-names';
-  function loadNames() { try { return JSON.parse(localStorage.getItem(NAMES_KEY) || '[]'); } catch(e) { return []; } }
-  function saveNames(list) { localStorage.setItem(NAMES_KEY, JSON.stringify(list)); }
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-  function renderNameSelect() {
-    var names = loadNames();
-    var cur = authorInput.value;
-    authorInput.innerHTML = '<option value="">이름 선택...</option>' +
-      names.map(function(n) { return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
-    if (names.indexOf(cur) !== -1) authorInput.value = cur;
-    var tagsEl = document.getElementById('name-tags');
-    if (names.length === 0) { tagsEl.innerHTML = ''; return; }
-    tagsEl.innerHTML = names.map(function(n) {
-      return '<span style="display:inline-flex;align-items:center;gap:4px;background:#fff0f0;border:1px solid #ffcdd2;border-radius:20px;padding:4px 10px;font-size:0.82rem;color:#555;">' +
-        escapeHtml(n) +
-        '<button type="button" data-name="' + escapeHtml(n) + '" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;line-height:1;padding:0;">×</button>' +
-        '</span>';
-    }).join('');
-    tagsEl.querySelectorAll('button[data-name]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var name = btn.getAttribute('data-name');
-        if (!confirm('"' + name + '" 을(를) 삭제할까요?')) return;
-        saveNames(loadNames().filter(function(n) { return n !== name; }));
-        renderNameSelect();
-      });
-    });
-  }
-  document.getElementById('btn-add-name').addEventListener('click', function() {
-    var name = prompt('추가할 이름을 입력하세요:');
-    if (!name || !name.trim()) return;
-    name = name.trim();
-    var names = loadNames();
-    if (names.indexOf(name) !== -1) { alert('이미 등록된 이름입니다.'); return; }
-    names.push(name);
-    saveNames(names);
-    renderNameSelect();
-    authorInput.value = name;
-  });
-  renderNameSelect();
-  unknownDate.addEventListener('change', function () {
-    dateInput.disabled = unknownDate.checked;
-    dateInput.style.opacity = unknownDate.checked ? '0.4' : '1';
-    if (unknownDate.checked) dateInput.value = '';
-    else dateInput.value = new Date().toISOString().slice(0, 10);
-  });
-  function switchTab(targetId) {
-    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.toggle('active', p.id === targetId); });
-    document.querySelectorAll('.tab-btn').forEach(function (b) {
-      var isActive = b.getAttribute('data-target') === targetId;
-      b.classList.toggle('active', isActive);
-      b.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    });
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }
-  document.querySelectorAll('.tab-btn').forEach(function (b) {
-    b.addEventListener('click', function () { switchTab(b.getAttribute('data-target')); });
-  });
-  function compressImage(dataUrl) {
-    return new Promise(function (resolve) {
-      var img = new Image();
-      img.onload = function () {
-        var MAX = 800, w = img.width, h = img.height;
-        if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
-        var canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.72));
-      };
-      img.onerror = function () { resolve(dataUrl); };
-      img.src = dataUrl;
-    });
-  }
-  function formatDate(iso) {
-    if (!iso) return '';
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '.';
-  }
-  function getMonthKey(d) { if (!d.date || d.unknownDate) return ''; return d.date.slice(0, 7); }
-  function render() {
-    dbGetAll().then(function (list) {
-      var months = Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();
-      var curMonth = filterMonth.value;
-      filterMonth.innerHTML = '<option value="">전체 월</option>' +
-        months.map(function (m) { var p = m.split('-'); return '<option value="' + m + '">' + p[0] + '년 ' + parseInt(p[1]) + '월</option>'; }).join('');
-      if (months.indexOf(curMonth) !== -1) filterMonth.value = curMonth;
-      var authors = Array.from(new Set(list.map(function (d) { return d.author; }))).sort();
-      var curAuthor = filterSelect.value;
-      filterSelect.innerHTML = '<option value="">전체 이름</option>' +
-        authors.map(function (a) { return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>'; }).join('');
-      if (authors.indexOf(curAuthor) !== -1) filterSelect.value = curAuthor;
-      var filtered = list;
-      if (filterMonth.value) filtered = filtered.filter(function (d) { return getMonthKey(d) === filterMonth.value; });
-      if (filterSelect.value) filtered = filtered.filter(function (d) { return d.author === filterSelect.value; });
-      filtered.sort(function (a, b) { return (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0); });
-      countLabel.textContent = filtered.length + '장';
-      if (filtered.length === 0) {
-        gallery.innerHTML = '';
-        emptyMsg.style.display = 'block';
-        emptyMsg.textContent = list.length === 0 ? '아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️' : '조건에 맞는 그림이 없어요.';
-        return;
-      }
-      emptyMsg.style.display = 'none';
-      gallery.innerHTML = filtered.map(function (d) {
-        return '<div class="gallery-item" data-id="' + escapeHtml(d.id) + '">' +
-          '<img src="' + d.image + '" alt="' + escapeHtml(d.title) + '" />' +
-          '<div class="meta"><div class="title">' + escapeHtml(d.title) + '</div>' +
-          '<div class="author">✏️ ' + escapeHtml(d.author) + '</div>' +
-          '<div class="date">' + escapeHtml(d.unknownDate ? '날짜 미상' : formatDate(d.date)) + '</div></div>' +
-          '<div class="actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="' + escapeHtml(d.id) + '">삭제</button></div>' +
-          '</div>';
-      }).join('');
-    });
-  }
-  function rotateImage(dataUrl, deg) {
-    return new Promise(function (resolve) {
-      var img = new Image();
-      img.onload = function () {
-        var canvas = document.createElement('canvas');
-        canvas.width = img.height; canvas.height = img.width;
-        var ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(deg * Math.PI / 180);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        resolve(compressImage(canvas.toDataURL('image/jpeg', 0.9)));
-      };
-      img.src = dataUrl;
-    });
-  }
-  document.getElementById('rotate-left').addEventListener('click', function () {
-    if (!pendingImage) return;
-    rotateImage(pendingImage, -90).then(function (d) { pendingImage = d; preview.src = d; });
-  });
-  document.getElementById('rotate-right').addEventListener('click', function () {
-    if (!pendingImage) return;
-    rotateImage(pendingImage, 90).then(function (d) { pendingImage = d; preview.src = d; });
-  });
-  function compressFile(file) {
-    return new Promise(function (resolve, reject) {
-      var url = URL.createObjectURL(file);
-      var img = new Image();
-      img.onload = function () {
-        URL.revokeObjectURL(url);
-        var MAX = 800, w = img.width, h = img.height;
-        if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
-        var canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.72));
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('이미지 로드 실패')); };
-      img.src = url;
-    });
-  }
-  function handleFileChange(input) {
-    var file = input.files && input.files[0];
-    if (!file) { pendingImage = null; previewWrap.classList.remove('show'); return; }
-    if (!file.type.startsWith('image/')) { alert('이미지 파일만 선택해 주세요.'); input.value = ''; return; }
-    compressFile(file).then(function (dataUrl) {
-      pendingImage = dataUrl; preview.src = dataUrl; previewWrap.classList.add('show');
-    }).catch(function () { alert('이미지를 불러오지 못했습니다. 다른 파일을 선택해 주세요.'); });
-  }
-  fileInput.addEventListener('change', function () { handleFileChange(fileInput); });
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!pendingImage) { alert('먼저 그림 파일을 선택해 주세요.'); return; }
-    var title = titleInput.value.trim(), author = authorInput.value.trim();
-    var isUnknown = unknownDate.checked, date = isUnknown ? '' : dateInput.value;
-    if (!title || !author) { alert('제목과 이름을 입력해 주세요.'); return; }
-    if (!isUnknown && !date) { alert('그린 날짜를 입력하거나 "날짜를 알 수 없음"을 체크해 주세요.'); return; }
-    var item = { id: 'd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), title: title, author: author, date: date, unknownDate: isUnknown, image: pendingImage, createdAt: Date.now() };
-    dbPut(item).then(function () {
-      form.reset();
-      unknownDate.checked = false;
-      dateInput.value = new Date().toISOString().slice(0, 10);
-      dateInput.disabled = false; dateInput.style.opacity = '1';
-      pendingImage = null; preview.src = ''; previewWrap.classList.remove('show');
-      renderNameSelect(); render(); switchTab('panel-gallery');
-    }).catch(function (err) { alert('저장에 실패했습니다.\n오류: ' + (err ? (err.name + ': ' + err.message) : '알 수 없는 오류')); });
-  });
-  gallery.addEventListener('click', function (e) {
-    var deleteBtn = e.target.closest('[data-action="delete"]');
-    if (deleteBtn) { e.stopPropagation(); if (confirm('이 그림을 삭제할까요?')) dbDelete(deleteBtn.getAttribute('data-id')).then(render); return; }
-    var item = e.target.closest('.gallery-item');
-    if (item) openModal(item.getAttribute('data-id'));
-  });
-  var currentModalData = null;
-  function openModal(id) {
-    dbGetAll().then(function (list) {
-      var d = list.find(function (x) { return x.id === id; });
-      if (!d) return;
-      currentModalData = d;
-      modalImage.src = d.image; modalImage.alt = d.title;
-      modalTitle.textContent = d.title; modalAuthor.textContent = d.author;
-      modalDate.textContent = d.unknownDate ? '날짜 미상' : formatDate(d.date);
-      modal.classList.add('show');
-    });
-  }
-  function closeModal() { modal.classList.remove('show'); modalImage.src = ''; currentModalData = null; }
-  modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
-  function triggerDownload(url, filename) {
-    var a = document.createElement('a');
-    a.href = url; a.download = filename; a.style.display = 'none';
-    document.body.appendChild(a); a.click();
-    setTimeout(function () { document.body.removeChild(a); if (url.startsWith('blob:')) URL.revokeObjectURL(url); }, 1500);
-  }
-  document.getElementById('btn-export').addEventListener('click', function () {
-    dbGetAll().then(function (list) {
-      if (list.length === 0) { alert('저장된 그림이 없습니다.'); return; }
-      var json = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), drawings: list });
-      var blob = new Blob([json], { type: 'application/json' });
-      var today = new Date().toISOString().slice(0, 10);
-      triggerDownload(URL.createObjectURL(blob), '그림백업_' + today + '.json');
-      alert(list.length + '개의 그림이 백업되었습니다!\n파일명: 그림백업_' + today + '.json');
-    });
-  });
-  document.getElementById('btn-import').addEventListener('click', function () { document.getElementById('import-file').click(); });
-  document.getElementById('import-file').addEventListener('change', function (e) {
-    var file = e.target.files && e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function () {
-      try {
-        var data = JSON.parse(reader.result), drawings = data.drawings || data;
-        if (!Array.isArray(drawings) || drawings.length === 0) { alert('올바른 백업 파일이 아닙니다.'); return; }
-        if (!confirm(drawings.length + '개의 그림을 복원합니다.\n기존 데이터에 추가됩니다. 계속할까요?')) return;
-        Promise.all(drawings.map(function (d) { return dbPut(d); })).then(function () {
-          alert(drawings.length + '개의 그림이 복원되었습니다!'); render(); switchTab('panel-gallery');
-        }).catch(function () { alert('일부 그림 복원에 실패했습니다.'); });
-      } catch (err) { alert('파일을 읽는 중 오류가 발생했습니다.'); }
-    };
-    reader.readAsText(file); e.target.value = '';
-  });
-  document.getElementById('btn-reset').addEventListener('click', function () {
-    if (!confirm('모든 그림 데이터가 삭제됩니다.\n삭제 후 복구가 불가능합니다.\n정말 초기화하시겠습니까?')) return;
-    if (!confirm('한 번 더 확인합니다.\n정말로 전체 삭제하시겠습니까?')) return;
-    openDB().then(function (d) {
-      var tx = d.transaction(STORE_NAME, 'readwrite');
-      tx.oncomplete = function () { try { localStorage.removeItem(LS_KEY); } catch(e) {} alert('초기화가 완료되었습니다.'); render(); switchTab('panel-gallery'); };
-      tx.onerror = function () { alert('초기화에 실패했습니다.'); };
-      tx.objectStore(STORE_NAME).clear();
-    }).catch(function () {
-      try { localStorage.removeItem(LS_KEY); alert('초기화가 완료되었습니다.'); render(); switchTab('panel-gallery'); }
-      catch(e) { alert('초기화에 실패했습니다.'); }
-    });
-  });
-  filterSelect.addEventListener('change', render);
-  filterMonth.addEventListener('change', render);
-  render();
+(function(){
+'use strict';
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('SW 등록 실패',e);});});}
+var DB_NAME='child-drawings-db',DB_VERSION=1,STORE_NAME='drawings',LS_KEY='child-drawings-v2';
+var db=null,useLS=false;
+function openDB(){return new Promise(function(resolve,reject){if(db){resolve(db);return;}if(useLS){reject(new Error('LS mode'));return;}try{var req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=function(e){var d=e.target.result;if(!d.objectStoreNames.contains(STORE_NAME))d.createObjectStore(STORE_NAME,{keyPath:'id'});};req.onsuccess=function(e){db=e.target.result;resolve(db);};req.onerror=function(){useLS=true;reject(req.error);};}catch(e){useLS=true;reject(e);}});}
+function lsGetAll(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}}
+function lsSave(list){try{localStorage.setItem(LS_KEY,JSON.stringify(list));}catch(e){throw new Error('저장 공간 부족');}}
+function dbGetAll(){return openDB().then(function(d){return new Promise(function(resolve,reject){var tx=d.transaction(STORE_NAME,'readonly');var req=tx.objectStore(STORE_NAME).getAll();req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error);};});}).catch(function(){return Promise.resolve(lsGetAll());});}
+function dbPut(item){return openDB().then(function(d){return new Promise(function(resolve,reject){var tx=d.transaction(STORE_NAME,'readwrite');tx.oncomplete=function(){resolve();};tx.onerror=function(){reject(tx.error);};tx.onabort=function(){reject(tx.error||new Error('저장 취소됨'));};tx.objectStore(STORE_NAME).put(item);});}).catch(function(){var list=lsGetAll();var idx=list.findIndex(function(x){return x.id===item.id;});if(idx>=0)list[idx]=item;else list.push(item);lsSave(list);return Promise.resolve();});}
+function dbDelete(id){return openDB().then(function(d){return new Promise(function(resolve,reject){var tx=d.transaction(STORE_NAME,'readwrite');var req=tx.objectStore(STORE_NAME).delete(id);req.onsuccess=function(){resolve();};req.onerror=function(){reject(req.error);};});}).catch(function(){lsSave(lsGetAll().filter(function(x){return x.id!==id;}));return Promise.resolve();});}
+var toastEl=document.getElementById('toast'),toastTimer=null;
+function showToast(msg,type){toastEl.textContent=msg;toastEl.className='toast'+(type?' '+type:'');requestAnimationFrame(function(){requestAnimationFrame(function(){toastEl.classList.add('show');});});if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.classList.remove('show');},2400);}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function formatDate(iso){if(!iso)return'';var d=new Date(iso);if(isNaN(d.getTime()))return iso;return d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.';}
+function getMonthKey(d){if(!d.date||d.unknownDate)return'';return d.date.slice(0,7);}
+var NAMES_KEY='child-drawing-names';
+function loadNames(){try{return JSON.parse(localStorage.getItem(NAMES_KEY)||'[]');}catch(e){return[];}}
+function saveNames(list){localStorage.setItem(NAMES_KEY,JSON.stringify(list));}
+var fileInput=document.getElementById('file-input'),preview=document.getElementById('preview'),previewWrap=document.getElementById('preview-wrap');
+var titleInput=document.getElementById('title-input'),authorInput=document.getElementById('author-input'),dateInput=document.getElementById('date-input'),unknownDate=document.getElementById('unknown-date');
+var form=document.getElementById('upload-form'),gallery=document.getElementById('gallery'),emptyMsg=document.getElementById('empty');
+var filterSelect=document.getElementById('filter-author'),filterMonth=document.getElementById('filter-month'),countLabel=document.getElementById('count-label');
+var pendingImage=null;
+dateInput.value=new Date().toISOString().slice(0,10);
+function renderNameSelect(selectEl,selectedVal){var names=loadNames();var cur=selectedVal!==undefined?selectedVal:(selectEl?selectEl.value:'');if(!selectEl)selectEl=authorInput;selectEl.innerHTML='<option value="">이름 선택...</option>'+names.map(function(n){return'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>';}).join('');if(names.indexOf(cur)!==-1)selectEl.value=cur;}
+function renderNameTags(){var names=loadNames();var tagsEl=document.getElementById('name-tags');if(names.length===0){tagsEl.innerHTML='';return;}tagsEl.innerHTML=names.map(function(n){return'<span style="display:inline-flex;align-items:center;gap:4px;background:#fff0f0;border:1px solid #ffcdd2;border-radius:20px;padding:4px 10px;font-size:0.82rem;color:#555;">'+escapeHtml(n)+'<button type="button" data-name="'+escapeHtml(n)+'" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;line-height:1;padding:0;">×</button></span>';}).join('');tagsEl.querySelectorAll('button[data-name]').forEach(function(btn){btn.addEventListener('click',function(){var name=btn.getAttribute('data-name');if(!confirm('"'+name+'" 을(를) 삭제할까요?'))return;saveNames(loadNames().filter(function(n){return n!==name;}));renderNameSelect(authorInput);renderNameTags();});});}
+document.getElementById('btn-add-name').addEventListener('click',function(){var name=prompt('추가할 이름을 입력하세요:');if(!name||!name.trim())return;name=name.trim();var names=loadNames();if(names.indexOf(name)!==-1){alert('이미 등록된 이름입니다.');return;}names.push(name);saveNames(names);renderNameSelect(authorInput);renderNameTags();authorInput.value=name;});
+renderNameSelect(authorInput);renderNameTags();
+unknownDate.addEventListener('change',function(){dateInput.disabled=unknownDate.checked;dateInput.style.opacity=unknownDate.checked?'0.4':'1';if(unknownDate.checked)dateInput.value='';else dateInput.value=new Date().toISOString().slice(0,10);});
+function switchTab(targetId){document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('active',p.id===targetId);});document.querySelectorAll('.tab-btn').forEach(function(b){var isActive=b.getAttribute('data-target')===targetId;b.classList.toggle('active',isActive);b.setAttribute('aria-selected',isActive?'true':'false');});window.scrollTo({top:0,behavior:'auto'});}
+document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('click',function(){switchTab(b.getAttribute('data-target'));});});
+function compressFile(file){return new Promise(function(resolve,reject){var url=URL.createObjectURL(file);var img=new Image();img.onload=function(){URL.revokeObjectURL(url);var MAX=800,w=img.width,h=img.height;if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',0.72));};img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('이미지 로드 실패'));};img.src=url;});}
+function rotateImage(dataUrl,deg){return new Promise(function(resolve){var img=new Image();img.onload=function(){var canvas=document.createElement('canvas');canvas.width=img.height;canvas.height=img.width;var ctx=canvas.getContext('2d');ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(deg*Math.PI/180);ctx.drawImage(img,-img.width/2,-img.height/2);resolve(canvas.toDataURL('image/jpeg',0.9));};img.src=dataUrl;});}
+fileInput.addEventListener('change',function(){var file=fileInput.files&&fileInput.files[0];if(!file){pendingImage=null;previewWrap.classList.remove('show');return;}if(!file.type.startsWith('image/')){alert('이미지 파일만 선택해 주세요.');fileInput.value='';return;}compressFile(file).then(function(dataUrl){pendingImage=dataUrl;preview.src=dataUrl;previewWrap.classList.add('show');}).catch(function(){alert('이미지를 불러오지 못했습니다.');});});
+document.getElementById('rotate-left').addEventListener('click',function(){if(!pendingImage)return;rotateImage(pendingImage,-90).then(function(d){pendingImage=d;preview.src=d;});});
+document.getElementById('rotate-right').addEventListener('click',function(){if(!pendingImage)return;rotateImage(pendingImage,90).then(function(d){pendingImage=d;preview.src=d;});});
+form.addEventListener('submit',function(e){e.preventDefault();if(!pendingImage){showToast('먼저 그림 파일을 선택해 주세요.','error');return;}var title=titleInput.value.trim(),author=authorInput.value.trim();var isUnknown=unknownDate.checked,date=isUnknown?'':dateInput.value;if(!title||!author){showToast('제목과 이름을 입력해 주세요.','error');return;}if(!isUnknown&&!date){showToast('그린 날짜를 입력하거나 "날짜 미상"을 체크해 주세요.','error');return;}var item={id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),title:title,author:author,date:date,unknownDate:isUnknown,image:pendingImage,createdAt:Date.now()};dbPut(item).then(function(){form.reset();unknownDate.checked=false;dateInput.value=new Date().toISOString().slice(0,10);dateInput.disabled=false;dateInput.style.opacity='1';pendingImage=null;preview.src='';previewWrap.classList.remove('show');renderNameSelect(authorInput);renderNameTags();render();switchTab('panel-gallery');showToast('✅ 그림이 저장됐어요!','success');}).catch(function(err){showToast('저장에 실패했습니다: '+(err?err.message:'오류'),'error');});});
+function render(){dbGetAll().then(function(list){var months=Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();var curMonth=filterMonth.value;filterMonth.innerHTML='<option value="">전체 월</option>'+months.map(function(m){var p=m.split('-');return'<option value="'+m+'">'+p[0]+'년 '+parseInt(p[1])+'월</option>';}).join('');if(months.indexOf(curMonth)!==-1)filterMonth.value=curMonth;var authors=Array.from(new Set(list.map(function(d){return d.author;}))).sort();var curAuthor=filterSelect.value;filterSelect.innerHTML='<option value="">전체 이름</option>'+authors.map(function(a){return'<option value="'+escapeHtml(a)+'">'+escapeHtml(a)+'</option>';}).join('');if(authors.indexOf(curAuthor)!==-1)filterSelect.value=curAuthor;var filtered=list;if(filterMonth.value)filtered=filtered.filter(function(d){return getMonthKey(d)===filterMonth.value;});if(filterSelect.value)filtered=filtered.filter(function(d){return d.author===filterSelect.value;});filtered.sort(function(a,b){return(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0);});countLabel.textContent=filtered.length+'장';if(filtered.length===0){gallery.innerHTML='';emptyMsg.style.display='block';emptyMsg.textContent=list.length===0?'아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️':'조건에 맞는 그림이 없어요.';return;}emptyMsg.style.display='none';gallery.innerHTML=filtered.map(function(d){return'<div class="gallery-item" data-id="'+escapeHtml(d.id)+'">'+'<img src="'+d.image+'" alt="'+escapeHtml(d.title)+'" />'+'<div class="meta"><div class="title">'+escapeHtml(d.title)+'</div><div class="author">✏️ '+escapeHtml(d.author)+'</div><div class="date">'+escapeHtml(d.unknownDate?'날짜 미상':formatDate(d.date))+'</div></div>'+'<div class="actions"><button type="button" class="btn-edit" data-action="edit" data-id="'+escapeHtml(d.id)+'">수정</button><button type="button" class="btn btn-danger" data-action="delete" data-id="'+escapeHtml(d.id)+'">삭제</button></div>'+'</div>';}).join('');});}
+gallery.addEventListener('click',function(e){var editBtn=e.target.closest('[data-action="edit"]');if(editBtn){e.stopPropagation();openEditModal(editBtn.getAttribute('data-id'));return;}var deleteBtn=e.target.closest('[data-action="delete"]');if(deleteBtn){e.stopPropagation();if(confirm('이 그림을 삭제할까요?')){dbDelete(deleteBtn.getAttribute('data-id')).then(function(){render();showToast('🗑️ 그림이 삭제됐어요.');});}return;}var item=e.target.closest('.gallery-item');if(item)openModal(item.getAttribute('data-id'));});
+var modal=document.getElementById('modal'),modalImage=document.getElementById('modal-image'),modalTitle=document.getElementById('modal-title'),modalAuthor=document.getElementById('modal-author'),modalDate=document.getElementById('modal-date'),currentModalId=null;
+function openModal(id){dbGetAll().then(function(list){var d=list.find(function(x){return x.id===id;});if(!d)return;currentModalId=id;modalImage.src=d.image;modalImage.alt=d.title;modalTitle.textContent=d.title;modalAuthor.textContent=d.author;modalDate.textContent=d.unknownDate?'날짜 미상':formatDate(d.date);modal.classList.add('show');});}
+function closeModal(){modal.classList.remove('show');modalImage.src='';currentModalId=null;}
+document.getElementById('modal-close').addEventListener('click',closeModal);
+modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+document.getElementById('modal-edit-btn').addEventListener('click',function(){if(currentModalId){closeModal();openEditModal(currentModalId);}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeEditModal();}});
+var editModal=document.getElementById('edit-modal'),editTitle=document.getElementById('edit-title'),editAuthor=document.getElementById('edit-author'),editDate=document.getElementById('edit-date'),editUnknownDate=document.getElementById('edit-unknown-date'),editingId=null;
+function openEditModal(id){dbGetAll().then(function(list){var d=list.find(function(x){return x.id===id;});if(!d)return;editingId=id;editTitle.value=d.title;renderNameSelect(editAuthor,d.author);editUnknownDate.checked=!!d.unknownDate;editDate.value=d.date||'';editDate.disabled=!!d.unknownDate;editDate.style.opacity=d.unknownDate?'0.4':'1';editModal.classList.add('show');});}
+function closeEditModal(){editModal.classList.remove('show');editingId=null;}
+editUnknownDate.addEventListener('change',function(){editDate.disabled=editUnknownDate.checked;editDate.style.opacity=editUnknownDate.checked?'0.4':'1';if(editUnknownDate.checked)editDate.value='';});
+document.getElementById('edit-modal-close').addEventListener('click',closeEditModal);
+document.getElementById('edit-cancel-btn').addEventListener('click',closeEditModal);
+editModal.addEventListener('click',function(e){if(e.target===editModal)closeEditModal();});
+document.getElementById('edit-save-btn').addEventListener('click',function(){var title=editTitle.value.trim(),author=editAuthor.value.trim(),isUnknown=editUnknownDate.checked,date=isUnknown?'':editDate.value;if(!title||!author){showToast('제목과 이름을 입력해 주세요.','error');return;}if(!isUnknown&&!date){showToast('날짜를 입력하거나 "날짜 미상"을 체크해 주세요.','error');return;}dbGetAll().then(function(list){var d=list.find(function(x){return x.id===editingId;});if(!d)return;d.title=title;d.author=author;d.date=date;d.unknownDate=isUnknown;return dbPut(d);}).then(function(){closeEditModal();render();showToast('✅ 수정됐어요!','success');}).catch(function(){showToast('수정에 실패했습니다.','error');});});
+var clToggle=document.getElementById('changelog-toggle'),clList=document.getElementById('changelog-list');
+clToggle.addEventListener('click',function(){var isOpen=clList.classList.toggle('show');clToggle.classList.toggle('open',isOpen);});
+function triggerDownload(url,filename){var a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);if(url.startsWith('blob:'))URL.revokeObjectURL(url);},1500);}
+document.getElementById('btn-export').addEventListener('click',function(){dbGetAll().then(function(list){if(list.length===0){showToast('저장된 그림이 없습니다.','error');return;}var json=JSON.stringify({version:1,exportedAt:new Date().toISOString(),drawings:list});var blob=new Blob([json],{type:'application/json'});var today=new Date().toISOString().slice(0,10);triggerDownload(URL.createObjectURL(blob),'그림백업_'+today+'.json');showToast('✅ '+list.length+'개 백업 완료!','success');});});
+document.getElementById('btn-import').addEventListener('click',function(){document.getElementById('import-file').click();});
+document.getElementById('import-file').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result),drawings=data.drawings||data;if(!Array.isArray(drawings)||drawings.length===0){showToast('올바른 백업 파일이 아닙니다.','error');return;}if(!confirm(drawings.length+'개의 그림을 복원합니다. 기존 데이터에 추가됩니다. 계속할까요?'))return;Promise.all(drawings.map(function(d){return dbPut(d);})).then(function(){render();switchTab('panel-gallery');showToast('✅ '+drawings.length+'개 복원 완료!','success');}).catch(function(){showToast('일부 그림 복원에 실패했습니다.','error');});}catch(err){showToast('파일을 읽는 중 오류가 발생했습니다.','error');}};reader.readAsText(file);e.target.value='';});
+document.getElementById('btn-reset').addEventListener('click',function(){if(!confirm('모든 그림 데이터가 삭제됩니다. 복구 불가능합니다. 정말 초기화하시겠습니까?'))return;if(!confirm('한 번 더 확인합니다. 정말로 전체 삭제하시겠습니까?'))return;openDB().then(function(d){var tx=d.transaction(STORE_NAME,'readwrite');tx.oncomplete=function(){try{localStorage.removeItem(LS_KEY);}catch(e){}render();switchTab('panel-gallery');showToast('초기화 완료');};tx.onerror=function(){showToast('초기화에 실패했습니다.','error');};tx.objectStore(STORE_NAME).clear();}).catch(function(){try{localStorage.removeItem(LS_KEY);render();switchTab('panel-gallery');showToast('초기화 완료');}catch(e){showToast('초기화에 실패했습니다.','error');}});});
+filterSelect.addEventListener('change',render);filterMonth.addEventListener('change',render);render();
 })();
 </script>
 </body>
