@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>자녀 그림 모바일 앨범</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { height: 100%; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: #f5f6fa; color: #333; line-height: 1.5; overscroll-behavior: none; }
   #app { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; overflow: hidden; }
-  header { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0; }
+  header { background: linear-gradient(135deg, #c0446a 0%, #e07080 100%); color: #fff; padding: 20px 16px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0; }
   header h1 { font-size: 1.5rem; }
   header p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
   main { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
@@ -113,6 +113,7 @@
 <header>
   <h1>🎨 자녀 그림 모바일 앨범</h1>
   <p>소중한 우리 아이의 그림을 기록해보세요</p>
+  <p style="font-size:0.75rem;opacity:0.85;margin-top:6px;">💡 이미지를 길게 누르면 핸드폰에 저장할 수 있어요.</p>
 </header>
 <main>
   <section class="card tab-panel" id="panel-upload">
@@ -157,10 +158,7 @@
     </form>
   </section>
   <section class="card tab-panel active" id="panel-gallery">
-    <p style="font-size:0.75rem;color:#aaa;margin-bottom:6px;">💡 이미지를 길게 누르면 핸드폰에 저장할 수 있어요.</p>
-    <h2>갤러리</h2>
     <div class="filter-bar">
-      <input type="search" id="filter-search" class="filter-search" placeholder="이름으로 검색..." />
       <select id="filter-author"><option value="">전체 이름</option></select>
       <select id="filter-month"><option value="">전체 월</option></select>
       <select id="filter-sort"><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="name">이름순</option></select>
@@ -170,7 +168,7 @@
     <div id="empty" class="empty" style="display:none;">아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️</div>
   </section>
   <section class="card tab-panel" id="panel-backup">
-    <h2>백업 / 복원</h2>
+    <h2>설정</h2>
     <div class="backup-section">
       <button type="button" class="backup-btn" id="btn-export"><span class="backup-icon">⬇️</span><div class="backup-btn-inner"><span>데이터 백업 (다운로드)</span><span class="backup-desc">모든 그림을 파일로 저장합니다. 핸드폰 변경 전 꼭 백업하세요.</span></div></button>
       <button type="button" class="backup-btn" id="btn-import"><span class="backup-icon">⬆️</span><div class="backup-btn-inner"><span>데이터 복원 (불러오기)</span><span class="backup-desc">백업 파일을 선택하면 그림이 복원됩니다.</span></div></button>
@@ -180,6 +178,7 @@
     <div class="changelog">
       <div class="changelog-toggle" id="changelog-toggle"><span>📋 버전 및 변경이력</span><span class="arrow">▼</span></div>
       <div class="changelog-list" id="changelog-list">
+        <div class="changelog-item"><span class="cl-ver">v26.07.31_01.01</span><span class="cl-date">[2026.07.31]</span>뷰포트 고정 / 안내문구 헤더 이동 / 이름 검색 제거 / 헤더 색상 변경 / 백업→설정 탭 명칭 변경</div>
         <div class="changelog-item">
           <span class="cl-ver">v26.07.30_01.08</span><span class="cl-date">[2026.07.30]</span>갤러리 이름 검색 + 정렬 기능 추가</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.07</span><span class="cl-date">[2026.07.30]</span>탭바 클릭 불가 버그 수정(flex 자식으로 전환)</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.06</span><span class="cl-date">[2026.07.30]</span>백업 복원 시 중복 그림 건너뛰기 적용</div><div class="changelog-item"><span class="cl-ver">v26.07.30_01.05</span>
           <span class="cl-date">[2026.07.30]</span>
@@ -192,13 +191,13 @@
         <div class="changelog-item"><span class="cl-ver">v26.07.28</span><span class="cl-date">[2026.07.28]</span>갤러리 이미지 다운로드 / 탭 네비게이션 도입 / PWA 지원</div>
       </div>
     </div>
-    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.30_01.09 · by Progrea</p>
+    <p style="margin-top:12px;text-align:center;font-size:0.75rem;color:#bbb;">v26.07.31_01.01 · by Progrea</p>
   </section>
 </main>
 <nav class="tabbar" role="tablist" aria-label="화면 전환">
   <button type="button" class="tab-btn active" data-target="panel-gallery" role="tab" aria-selected="true"><span class="tab-icon">🖼️</span><span>갤러리</span></button>
   <button type="button" class="tab-btn" data-target="panel-upload" role="tab" aria-selected="false"><span class="tab-icon">➕</span><span>그림 저장</span></button>
-  <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false"><span class="tab-icon">💾</span><span>백업</span></button>
+  <button type="button" class="tab-btn" data-target="panel-backup" role="tab" aria-selected="false"><span class="tab-icon">⚙️</span><span>설정</span></button>
 </nav>
 </div>
 <div id="modal" class="modal" role="dialog" aria-modal="true"><div class="modal-content"><div class="modal-header"><h3 id="modal-title"></h3><button type="button" class="btn btn-close" id="modal-close" aria-label="닫기">&times;</button></div><div class="modal-body"><img id="modal-image" alt="" /></div><div class="modal-footer"><span><strong>이름</strong><span id="modal-author"></span></span><span><strong>날짜</strong><span id="modal-date"></span></span><button type="button" class="btn-edit" id="modal-edit-btn">✏️ 수정</button></div></div></div>
@@ -239,7 +238,7 @@ fileInput.addEventListener('change',function(){var file=fileInput.files&&fileInp
 document.getElementById('rotate-left').addEventListener('click',function(){if(!pendingImage)return;rotateImage(pendingImage,-90).then(function(d){pendingImage=d;preview.src=d;});});
 document.getElementById('rotate-right').addEventListener('click',function(){if(!pendingImage)return;rotateImage(pendingImage,90).then(function(d){pendingImage=d;preview.src=d;});});
 form.addEventListener('submit',function(e){e.preventDefault();if(!pendingImage){showToast('먼저 그림 파일을 선택해 주세요.','error');return;}var title=titleInput.value.trim(),author=authorInput.value.trim();var isUnknown=unknownDate.checked,date=isUnknown?'':dateInput.value;if(!title||!author){showToast('제목과 이름을 입력해 주세요.','error');return;}if(!isUnknown&&!date){showToast('그린 날짜를 입력하거나 "날짜 미상"을 체크해 주세요.','error');return;}var item={id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),title:title,author:author,date:date,unknownDate:isUnknown,image:pendingImage,createdAt:Date.now()};dbPut(item).then(function(){form.reset();unknownDate.checked=false;dateInput.value=new Date().toISOString().slice(0,10);dateInput.disabled=false;dateInput.style.opacity='1';pendingImage=null;preview.src='';previewWrap.classList.remove('show');renderNameSelect(authorInput);renderNameTags();render();switchTab('panel-gallery');showToast('✅ 그림이 저장됐어요!','success');}).catch(function(err){showToast('저장에 실패했습니다: '+(err?err.message:'오류'),'error');});});
-function render(){dbGetAll().then(function(list){var months=Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();var curMonth=filterMonth.value;filterMonth.innerHTML='<option value="">전체 월</option>'+months.map(function(m){var p=m.split('-');return'<option value="'+m+'">'+p[0]+'년 '+parseInt(p[1])+'월</option>';}).join('');if(months.indexOf(curMonth)!==-1)filterMonth.value=curMonth;var authors=Array.from(new Set(list.map(function(d){return d.author;}))).sort();var curAuthor=filterSelect.value;filterSelect.innerHTML='<option value="">전체 이름</option>'+authors.map(function(a){return'<option value="'+escapeHtml(a)+'">'+escapeHtml(a)+'</option>';}).join('');if(authors.indexOf(curAuthor)!==-1)filterSelect.value=curAuthor;var filtered=list;if(filterMonth.value)filtered=filtered.filter(function(d){return getMonthKey(d)===filterMonth.value;});if(filterSelect.value)filtered=filtered.filter(function(d){return d.author===filterSelect.value;});var sq=(document.getElementById('filter-search')||{value:''}).value.trim().toLowerCase();if(sq)filtered=filtered.filter(function(d){return(d.author||'').toLowerCase().indexOf(sq)!==-1;});var sv=(document.getElementById('filter-sort')||{value:'newest'}).value;if(sv==='oldest'){filtered.sort(function(a,b){return(a.date||'').localeCompare(b.date||'')||(a.createdAt||0)-(b.createdAt||0);});}else if(sv==='name'){filtered.sort(function(a,b){return(a.author||'').localeCompare(b.author||'','ko');});}else{filtered.sort(function(a,b){return(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0);});}countLabel.textContent=filtered.length+'장';if(filtered.length===0){gallery.innerHTML='';emptyMsg.style.display='block';emptyMsg.textContent=list.length===0?'아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️':'조건에 맞는 그림이 없어요.';return;}emptyMsg.style.display='none';gallery.innerHTML=filtered.map(function(d){return'<div class="gallery-item" data-id="'+escapeHtml(d.id)+'">'+'<img src="'+d.image+'" alt="'+escapeHtml(d.title)+'" />'+'<div class="meta"><div class="title">'+escapeHtml(d.title)+'</div><div class="author">✏️ '+escapeHtml(d.author)+'</div><div class="date">'+escapeHtml(d.unknownDate?'날짜 미상':formatDate(d.date))+'</div></div>'+'<div class="actions"><button type="button" class="btn-edit" data-action="edit" data-id="'+escapeHtml(d.id)+'">수정</button><button type="button" class="btn btn-danger" data-action="delete" data-id="'+escapeHtml(d.id)+'">삭제</button></div>'+'</div>';}).join('');});}
+function render(){dbGetAll().then(function(list){var months=Array.from(new Set(list.map(getMonthKey).filter(Boolean))).sort().reverse();var curMonth=filterMonth.value;filterMonth.innerHTML='<option value="">전체 월</option>'+months.map(function(m){var p=m.split('-');return'<option value="'+m+'">'+p[0]+'년 '+parseInt(p[1])+'월</option>';}).join('');if(months.indexOf(curMonth)!==-1)filterMonth.value=curMonth;var authors=Array.from(new Set(list.map(function(d){return d.author;}))).sort();var curAuthor=filterSelect.value;filterSelect.innerHTML='<option value="">전체 이름</option>'+authors.map(function(a){return'<option value="'+escapeHtml(a)+'">'+escapeHtml(a)+'</option>';}).join('');if(authors.indexOf(curAuthor)!==-1)filterSelect.value=curAuthor;var filtered=list;if(filterMonth.value)filtered=filtered.filter(function(d){return getMonthKey(d)===filterMonth.value;});if(filterSelect.value)filtered=filtered.filter(function(d){return d.author===filterSelect.value;});var sv=(document.getElementById('filter-sort')||{value:'newest'}).value;if(sv==='oldest'){filtered.sort(function(a,b){return(a.date||'').localeCompare(b.date||'')||(a.createdAt||0)-(b.createdAt||0);});}else if(sv==='name'){filtered.sort(function(a,b){return(a.author||'').localeCompare(b.author||'','ko');});}else{filtered.sort(function(a,b){return(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0);});}countLabel.textContent=filtered.length+'장';if(filtered.length===0){gallery.innerHTML='';emptyMsg.style.display='block';emptyMsg.textContent=list.length===0?'아직 저장된 그림이 없어요. 첫 그림을 추가해보세요! 🖍️':'조건에 맞는 그림이 없어요.';return;}emptyMsg.style.display='none';gallery.innerHTML=filtered.map(function(d){return'<div class="gallery-item" data-id="'+escapeHtml(d.id)+'">'+'<img src="'+d.image+'" alt="'+escapeHtml(d.title)+'" />'+'<div class="meta"><div class="title">'+escapeHtml(d.title)+'</div><div class="author">✏️ '+escapeHtml(d.author)+'</div><div class="date">'+escapeHtml(d.unknownDate?'날짜 미상':formatDate(d.date))+'</div></div>'+'<div class="actions"><button type="button" class="btn-edit" data-action="edit" data-id="'+escapeHtml(d.id)+'">수정</button><button type="button" class="btn btn-danger" data-action="delete" data-id="'+escapeHtml(d.id)+'">삭제</button></div>'+'</div>';}).join('');});}
 gallery.addEventListener('click',function(e){var editBtn=e.target.closest('[data-action="edit"]');if(editBtn){e.stopPropagation();openEditModal(editBtn.getAttribute('data-id'));return;}var deleteBtn=e.target.closest('[data-action="delete"]');if(deleteBtn){e.stopPropagation();if(confirm('이 그림을 삭제할까요?')){dbDelete(deleteBtn.getAttribute('data-id')).then(function(){render();showToast('🗑️ 그림이 삭제됐어요.');});}return;}var item=e.target.closest('.gallery-item');if(item)openModal(item.getAttribute('data-id'));});
 var modal=document.getElementById('modal');var modalImage=document.getElementById('modal-image');var modalTitle=document.getElementById('modal-title');var modalAuthor=document.getElementById('modal-author');var modalDate=document.getElementById('modal-date');var currentModalId=null;
 function openModal(id){dbGetAll().then(function(list){var d=list.find(function(x){return x.id===id;});if(!d)return;currentModalId=id;modalImage.src=d.image;modalImage.alt=d.title;modalTitle.textContent=d.title;modalAuthor.textContent=d.author;modalDate.textContent=d.unknownDate?'날짜 미상':formatDate(d.date);modal.classList.add('show');});}
@@ -262,7 +261,7 @@ document.getElementById('btn-export').addEventListener('click',function(){dbGetA
 document.getElementById('btn-import').addEventListener('click',function(){document.getElementById('import-file').click();});
 document.getElementById('import-file').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result),drawings=data.drawings||data;if(!Array.isArray(drawings)||drawings.length===0){showToast('올바른 백업 파일이 아닙니다.','error');return;}if(!confirm(drawings.length+'개의 그림을 복원합니다. 이미 존재하는 그림은 건너뜁니다. 계속할까요?'))return;dbGetAll().then(function(existing){var existingIds=new Set(existing.map(function(x){return x.id;}));var toAdd=drawings.filter(function(d){return!existingIds.has(d.id);});var skipped=drawings.length-toAdd.length;if(toAdd.length===0){showToast('추가할 그림이 없습니다. ('+skipped+'개 이미 존재)','error');return;}return Promise.all(toAdd.map(function(d){return dbPut(d);})).then(function(){render();switchTab('panel-gallery');var msg='✅ '+toAdd.length+'개 복원 완료!';if(skipped>0)msg+=' ('+skipped+'개 중복 건너뜀)';showToast(msg,'success');});}).catch(function(){showToast('일부 그림 복원에 실패했습니다.','error');});}catch(err){showToast('파일을 읽는 중 오류가 발생했습니다.','error');}};reader.readAsText(file);e.target.value='';});
 document.getElementById('btn-reset').addEventListener('click',function(){if(!confirm('모든 그림 데이터가 삭제됩니다. 복구 불가능합니다. 정말 초기화하시겠습니까?'))return;if(!confirm('한 번 더 확인합니다. 정말로 전체 삭제하시겠습니까?'))return;openDB().then(function(d){var tx=d.transaction(STORE_NAME,'readwrite');tx.oncomplete=function(){try{localStorage.removeItem(LS_KEY);}catch(e){}render();switchTab('panel-gallery');showToast('초기화 완료');};tx.onerror=function(){showToast('초기화에 실패했습니다.','error');};tx.objectStore(STORE_NAME).clear();}).catch(function(){try{localStorage.removeItem(LS_KEY);render();switchTab('panel-gallery');showToast('초기화 완료');}catch(e){showToast('초기화에 실패했습니다.','error');}});});
-filterSelect.addEventListener('change',render);filterMonth.addEventListener('change',render);var _fs=document.getElementById('filter-search');if(_fs)_fs.addEventListener('input',render);var _fst=document.getElementById('filter-sort');if(_fst)_fst.addEventListener('change',render);render();
+filterSelect.addEventListener('change',render);filterMonth.addEventListener('change',render);var _fst=document.getElementById('filter-sort');if(_fst)_fst.addEventListener('change',render);render();
 })();
 </script>
 </body>
